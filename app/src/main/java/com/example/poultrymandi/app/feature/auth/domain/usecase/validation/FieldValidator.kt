@@ -126,6 +126,16 @@ object FieldValidator {
         }
     }
 
+    fun validateOccupation(occupation: String): ValidationResult {
+        return when {
+            occupation.isBlank() -> {
+                ValidationResult.Error("Occupation required hai")
+            }
+            else -> ValidationResult.Success
+        }
+    }
+
+
     // ==================== CONFIRM PASSWORD VALIDATION ====================
     /**
      * Dono passwords match kar rahe hain ya nahi check karo
@@ -214,6 +224,8 @@ object FieldValidator {
             else -> ValidationResult.Success
         }
     }
+
+
 
     // ==================== TEXT FIELD VALIDATION (GENERIC) ====================
     /**

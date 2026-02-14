@@ -151,7 +151,7 @@ class LoginViewModel @Inject constructor(
 
                 kotlinx.coroutines.delay(2000)
 
-                // Step 5: Success response
+
                 _uiState.value = currentState.copy(
                     isLoading = false,
                     loginSuccess = true,

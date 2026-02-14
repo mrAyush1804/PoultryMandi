@@ -1,6 +1,7 @@
 package com.example.poultrymandi.app.feature.auth.presentation.signup
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,13 +11,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.poultrymandi.R
@@ -26,23 +25,23 @@ import com.example.poultrymandi.app.Core.ui.components.CustomInputType
 import com.example.poultrymandi.app.Core.ui.components.CustomTextFieldState
 import com.example.poultrymandi.app.Core.ui.theme.BlackC
 import com.example.poultrymandi.app.Core.ui.theme.brown
+import com.example.poultrymandi.app.feature.auth.presentation.singup.SingupEvent
+import com.example.poultrymandi.app.feature.auth.presentation.singup.SingupViewModel
 
-@Preview(showBackground = true)
+
 @Composable
 fun SignupScreen(
+    viewModel: SingupViewModel = viewModel(),
     onLoginClick: () -> Unit = {},
     onSignupSuccess: () -> Unit = {}
 ) {
-    // States (ViewModel integrate karne par ye uiState se aayengi)
-    var name by remember { mutableStateOf("") }
-    var contactInput by remember { mutableStateOf("") }
-    var occupation by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var isPasswordVisible by remember { mutableStateOf(false) }
 
+    val uiState by viewModel.uiState.collectAsState()
+    var contactInput by remember { mutableStateOf("") }
+    var isPasswordVisible by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
-    // Dynamic Logic for Contact (Email/Phone)
+
     val isPhone = contactInput.all { it.isDigit() } && contactInput.isNotEmpty()
     val currentInputType = if (isPhone) CustomInputType.Phone else CustomInputType.Email
 
@@ -62,7 +61,7 @@ fun SignupScreen(
             Image(
                 painter = painterResource(R.drawable.chicks),
                 contentDescription = "App Logo",
-                modifier = Modifier.size(80.dp),
+                modifier = Modifier.size(70.dp),
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -82,12 +81,52 @@ fun SignupScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            if (uiState.generalError != null) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFFFEBEE)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = uiState.generalError ?: "",
+                            color = Color(0xFFC62828),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = Color(0xFFC62828),
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clickable {
+                                    viewModel.onEvent(SingupEvent.ClearError)
+                                }
+                        )
+                    }
+                }
+            }
+
             // 1. Full Name Field
             AppEditText(
-                value = name,
-                onValueChange = { name = it },
+                value = uiState.name,
+                onValueChange = { name ->
+                 viewModel.onEvent(SingupEvent.NameChanged(name))
+                },
                 label = "Full Name",
                 placeholder = "Enter your full name",
+                errorMessage = uiState.nameError,
+                isError = uiState.nameError != null,
                 inputType = CustomInputType.Name,
                 state = CustomTextFieldState(
                     borderColor = brown,
@@ -103,11 +142,15 @@ fun SignupScreen(
 
             // 2. Email/Phone Field (Dynamic)
             AppEditText(
-                value = contactInput,
-                onValueChange = { contactInput = it },
+                value = uiState.email,
+                onValueChange = {
+                 viewModel.onEvent(SingupEvent.EmailChanged(it))
+                },
                 label = if (isPhone) "Phone Number" else "Email or Phone",
                 placeholder = if (isPhone) "9876543210" else "example@gmail.com",
                 inputType = currentInputType,
+                errorMessage = uiState.emailError,
+                isError = uiState.emailError != null,
                 state = CustomTextFieldState(
                     borderColor = brown,
                     focusedBorderColor = Color.Black,
@@ -126,11 +169,16 @@ fun SignupScreen(
 
             // 3. Occupation Field
             AppEditText(
-                value = occupation,
-                onValueChange = { occupation = it },
+                value = uiState.occupation,
+                onValueChange = {
+                  viewModel.onEvent(SingupEvent.OccupationChanged(it))
+
+                },
                 label = "Occupation",
                 placeholder = "Farmer, Trader, or Retailer?",
                 inputType = CustomInputType.Text,
+                errorMessage = uiState.occupationError,
+                isError = uiState.occupationError != null,
                 state = CustomTextFieldState(
                     borderColor = brown,
                     focusedBorderColor = Color.Black,
@@ -145,11 +193,15 @@ fun SignupScreen(
 
             // 4. Password Field
             AppEditText(
-                value = password,
-                onValueChange = { password = it },
+                value = uiState.password,
+                onValueChange = {
+                    viewModel.onEvent(SingupEvent.PasswordChanged(it))
+                },
                 label = "Password",
                 placeholder = "Create a strong password",
                 inputType = CustomInputType.Password,
+                errorMessage = uiState.passwordError,
+                isError = uiState.passwordError != null,
                 state = CustomTextFieldState(
                     borderColor = brown,
                     focusedBorderColor = Color.Black,
@@ -169,7 +221,7 @@ fun SignupScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Main Signup Button
+
             AppButton(
                 text = "Create Account",
                 onClick = { /* ViewModel Call */ },
@@ -178,25 +230,27 @@ fun SignupScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Divider or "OR"
+
             Text(text = "OR", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Google Signup Button
+
             AppButton(
                 text = "Signup with Google",
                 onClick = { /* Google Auth Logic */ },
+                enabled = uiState.isFormValid && !uiState.isLoading,
+                isLoading = uiState.isLoading,
                 modifier = Modifier.fillMaxWidth(),
-                   leadingIcon = {
+                leadingIcon = {
 
-                       Icon(
-                           painter = painterResource(id = R.drawable.google),
-                           contentDescription = null,
-                           tint = Color.Unspecified,
-                           modifier = Modifier.size(24.dp)
-                       )
-                   },
+                    Icon(
+                        painter = painterResource(id = R.drawable.google),
+                        contentDescription = null,
+                        tint = Color.Unspecified,
+                        modifier = Modifier.size(24.dp)
+                    )
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = BlackC)
             )
 
@@ -212,5 +266,8 @@ fun SignupScreen(
         }
     }
 }
+
+
+
 
 

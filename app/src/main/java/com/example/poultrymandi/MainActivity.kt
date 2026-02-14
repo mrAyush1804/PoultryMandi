@@ -11,6 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import com.example.poultrymandi.app.Core.ui.theme.PoultryMandiTheme
 import com.example.poultrymandi.app.feature.auth.presentation.login.LoginScreen
+import com.example.poultrymandi.app.feature.auth.presentation.signup.SignupScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -24,7 +25,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.Companion.fillMaxSize()) { innerPadding ->
 
                     Box(modifier = Modifier.padding(innerPadding)) {
-                        LoginScreen()
+                        SignupScreen()
                     }
 
                 }
