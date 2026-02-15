@@ -32,11 +32,12 @@ import com.example.poultrymandi.app.Core.ui.theme.brown
 
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel = viewModel(),
+    uiState: LoginState,
+    onEvent: (LoginEvent) -> Unit,
     onLoginSuccess: () -> Unit = {},
     onSignupClick: () -> Unit = {},
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+
     var isPasswordVisible by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
@@ -108,8 +109,7 @@ fun LoginScreen(
                             tint = Color(0xFFC62828),
                             modifier = Modifier
                                 .size(20.dp)
-                                .clickable {
-                                    viewModel.onEvent(LoginEvent.ClearError)
+                                .clickable { onEvent(LoginEvent.ClearError)
                                 }
                         )
                     }
@@ -119,7 +119,7 @@ fun LoginScreen(
             AppEditText(
                 value = uiState.email,
                 onValueChange = { email ->
-                    viewModel.onEvent(LoginEvent.EmailChanged(email))
+                    onEvent(LoginEvent.EmailChanged(email))
                 },
                 label = currentLabel,
                 placeholder = currentPlaceholder,
@@ -148,7 +148,7 @@ fun LoginScreen(
             AppEditText(
                 value = uiState.password,
                 onValueChange = { password ->
-                    viewModel.onEvent(LoginEvent.PasswordChanged(password))
+                    onEvent(LoginEvent.PasswordChanged(password))
                 },
                 label = "Password",
                 placeholder = "Enter your password",
@@ -195,7 +195,7 @@ fun LoginScreen(
                 Checkbox(
                     checked = uiState.rememberMe,
                     onCheckedChange = { checked ->
-                        viewModel.onEvent(LoginEvent.RememberMeChanged(checked))
+                        onEvent(LoginEvent.RememberMeChanged(checked))
                     },
                     colors = CheckboxDefaults.colors(
                         checkedColor = brown,
@@ -216,7 +216,7 @@ fun LoginScreen(
             AppButton(
                 text = "Login Now",
                 onClick = {
-                    viewModel.onEvent(LoginEvent.LoginClicked)
+                    onEvent(LoginEvent.LoginClicked)
                 },
                 enabled = uiState.isFormValid && !uiState.isLoading,
                 isLoading = uiState.isLoading,

@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
+import com.example.poultrymandi.app.Core.navigation.AppNavigation
 import com.example.poultrymandi.app.Core.ui.theme.PoultryMandiTheme
 import com.example.poultrymandi.app.feature.auth.presentation.login.LoginScreen
 import com.example.poultrymandi.app.feature.auth.presentation.signup.SignupScreen
@@ -21,11 +23,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PoultryMandiTheme {
+                val navController = rememberNavController()
 
                 Scaffold(modifier = Modifier.Companion.fillMaxSize()) { innerPadding ->
 
                     Box(modifier = Modifier.padding(innerPadding)) {
-                        SignupScreen()
+                        AppNavigation(navController = navController)
+
+
                     }
 
                 }
