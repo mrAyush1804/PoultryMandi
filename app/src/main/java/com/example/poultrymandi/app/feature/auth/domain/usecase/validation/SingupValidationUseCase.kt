@@ -69,12 +69,14 @@ class SingupValidationUseCase @Inject constructor() {
         name: String,
         email: String,
         phone: String,
+        occupation: String,
         password: String,
         confirmPassword: String
     ): SingupValidationResult {
         val nameValidation = validateName(name)
         val emailValidation = validateEmail(email)
         val phoneValidation = validatePhone(phone)
+        val occupationValidation = validateOccupation(occupation)
         val passwordValidation = validatePassword(password)
         val confirmPasswordValidation = validateConfirmPassword(password, confirmPassword)
 
@@ -82,12 +84,14 @@ class SingupValidationUseCase @Inject constructor() {
             nameValidation = nameValidation,
             emailValidation = emailValidation,
             phoneValidation = phoneValidation,
+            occupationValidation=occupationValidation,
             passwordValidation = passwordValidation,
             confirmPasswordValidation = confirmPasswordValidation,
             isFormValid = listOf(
                 nameValidation,
                 emailValidation,
                 phoneValidation,
+                occupationValidation,
                 passwordValidation,
                 confirmPasswordValidation
             ).all { it is ValidationResult.Success }
@@ -101,10 +105,11 @@ class SingupValidationUseCase @Inject constructor() {
         name: String,
         email: String,
         phone: String,
+        occupation: String,
         password: String,
         confirmPassword: String
     ): Boolean {
-        return validateSignupForm(name, email, phone, password, confirmPassword).isFormValid
+        return validateSignupForm(name, email, phone, occupation , password, confirmPassword).isFormValid
     }
 
 

@@ -65,15 +65,3 @@ fun SplashScreen(
 
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun pre() {
-    TwinLinesAnimationWrapper(
-        content = {
-            SplashScreen()
-        },
-        Logo = 1
-    )
-
-
-}

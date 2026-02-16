@@ -46,6 +46,11 @@ class SingupViewModel @Inject constructor(
                 updateoccupation(event.occupation)
             }
 
+            is SingupEvent.ConfirmPasswordChanged -> {
+                updateConfirmPassword(event.confirmPassword)
+            }
+
+
             SingupEvent.SignupClicked -> {
                 performSignup()
             }
@@ -58,6 +63,35 @@ class SingupViewModel @Inject constructor(
         }
     }
 
+    private fun updateConfirmPassword(confirmPassword: String) {
+        val confirmPasswordValidation = singupValidationUseCase.validateConfirmPassword(
+            password = _uiState.value.password,
+            confirmPassword = confirmPassword
+        )
+
+        val confirmPasswordError = when (confirmPasswordValidation) {
+            is ValidationResult.Error -> confirmPasswordValidation.message
+            ValidationResult.Success -> null
+
+        }
+
+        _uiState.value = _uiState.value.copy(
+            confirmPassword = confirmPassword,
+            confirmPasswordError = confirmPasswordError,
+            isFormValid = checkFormValidity(
+                name = _uiState.value.name,
+                email = _uiState.value.email,
+                contact = _uiState.value.contact,
+                occupation = _uiState.value.occupation,
+                password = _uiState.value.password,
+                confirmPassword = confirmPassword
+            )
+
+
+        )
+
+    }
+
     private fun updateoccupation(occupation: String) {
         val occupationValidation = singupValidationUseCase.validateOccupation(occupation)
 
@@ -67,15 +101,15 @@ class SingupViewModel @Inject constructor(
 
         }
 
-        _uiState.value=_uiState.value.copy(
+        _uiState.value = _uiState.value.copy(
             occupation = occupation,
             occupationError = occupationError,
             isFormValid = checkFormValidity(
-                _uiState.value.email,
-                _uiState.value.password,
-                _uiState.value.name,
-                occupation
-
+                name = _uiState.value.name,
+                email = _uiState.value.email,
+                contact = _uiState.value.contact,
+                password = _uiState.value.password,
+                confirmPassword = _uiState.value.confirmPassword
             )
         )
     }
@@ -93,8 +127,15 @@ class SingupViewModel @Inject constructor(
             ValidationResult.Success -> null
         }
         _uiState.value = _uiState.value.copy(
-            name = name, nameError = nameError, isFormValid = checkFormValidity(
-                _uiState.value.email, _uiState.value.password, name, _uiState.value.contact
+            name = name,
+            nameError = nameError,
+            isFormValid = checkFormValidity(
+                name = name,
+                email = _uiState.value.email,
+                contact = _uiState.value.contact,
+                occupation = _uiState.value.occupation,
+                password = _uiState.value.password,
+                confirmPassword = _uiState.value.confirmPassword
             )
         )
 
@@ -108,8 +149,15 @@ class SingupViewModel @Inject constructor(
 
         }
         _uiState.value = _uiState.value.copy(
-            contact = contact, contactError = contactError, isFormValid = checkFormValidity(
-                _uiState.value.email, _uiState.value.password, _uiState.value.name, contact
+            contact = contact,
+            contactError = contactError,
+            isFormValid = checkFormValidity(
+                name = _uiState.value.name,
+                email = _uiState.value.email,
+                contact = contact,
+                occupation = _uiState.value.occupation,
+                password = _uiState.value.password,
+                confirmPassword = _uiState.value.confirmPassword
             )
         )
 
@@ -125,13 +173,14 @@ class SingupViewModel @Inject constructor(
             password = password,
             passwordError = passwordError,
             generalError = null,
-            isFormValid =
-                checkFormValidity(
-                    _uiState.value.email,
-                    password,
-                    _uiState.value.name,
-                    _uiState.value.contact
-                )
+            isFormValid = checkFormValidity(
+                name = _uiState.value.name,
+                email = _uiState.value.email,
+                contact = _uiState.value.contact,
+                occupation = _uiState.value.occupation,
+                password = password,
+                confirmPassword = _uiState.value.confirmPassword
+            )
         )
 
 
@@ -150,10 +199,12 @@ class SingupViewModel @Inject constructor(
             emailError = emailError,
             generalError = null,
             isFormValid = checkFormValidity(
-                email,
-                _uiState.value.password,
-                _uiState.value.name,
-                _uiState.value.contact
+                name = _uiState.value.name,
+                email = email,
+                contact = _uiState.value.contact,
+                occupation = _uiState.value.occupation,
+                password = _uiState.value.password,
+                confirmPassword = _uiState.value.confirmPassword
             )
 
         )
@@ -161,16 +212,23 @@ class SingupViewModel @Inject constructor(
     }
 
     private fun checkFormValidity(
-        email: String, password: String, name: String, contact: String
+        name: String = _uiState.value.name,
+        email: String = _uiState.value.email,
+        contact: String = _uiState.value.contact,
+        occupation: String = _uiState.value.occupation,
+        password: String = _uiState.value.password,
+        confirmPassword: String = _uiState.value.confirmPassword
     ): Boolean {
-        val validation = singupValidationUseCase.validateSignupForm(
+        return singupValidationUseCase.validateSignupForm(
             name = name,
             email = email,
             phone = contact,
             password = password,
-            confirmPassword = password
-        )
-        return validation.isFormValid
+            occupation = _uiState.value.occupation,
+            confirmPassword = confirmPassword
+        ).isFormValid
+
+
     }
 
 
@@ -183,7 +241,8 @@ class SingupViewModel @Inject constructor(
             email = currentState.email,
             phone = currentState.contact,
             password = currentState.password,
-            confirmPassword = currentState.password
+            occupation = currentState.occupation,
+            confirmPassword = currentState.confirmPassword
         )
 
 
@@ -201,8 +260,13 @@ class SingupViewModel @Inject constructor(
 
                 },
 
-                contactError = when (formValidation.passwordValidation) {
-                    is ValidationResult.Error -> (formValidation.passwordValidation as ValidationResult.Error).message
+                contactError = when (formValidation.phoneValidation) {
+                    is ValidationResult.Error -> (formValidation.phoneValidation as ValidationResult.Error).message
+                    ValidationResult.Success -> null
+
+                },
+                occupationError =when(formValidation.occupationValidation) {
+                    is ValidationResult.Error -> (formValidation.occupationValidation as ValidationResult.Error).message
                     ValidationResult.Success -> null
 
                 },

@@ -42,7 +42,7 @@ fun SignupScreen(
     val scrollState = rememberScrollState()
 
 
-    val isPhone = contactInput.all { it.isDigit() } && contactInput.isNotEmpty()
+    val isPhone = uiState.email.all { it.isDigit() } && uiState.email.isNotEmpty()
     val currentInputType = if (isPhone) CustomInputType.Phone else CustomInputType.Email
 
     Surface(
@@ -222,9 +222,43 @@ fun SignupScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
 
+            AppEditText(
+                value = uiState.confirmPassword,
+                onValueChange = {
+                    viewModel.onEvent(SingupEvent.ConfirmPasswordChanged(it))
+                },
+                label = "Confirm Password",
+                placeholder = "Create a strong password",
+                inputType = CustomInputType.Password,
+                errorMessage = uiState.confirmPasswordError,
+                isError = uiState.confirmPasswordError != null,
+                state = CustomTextFieldState(
+                    borderColor = brown,
+                    focusedBorderColor = Color.Black,
+                    shape = MaterialTheme.shapes.medium
+                ),
+                leadingIcon = {
+                    Icon(imageVector = Icons.Default.Lock, contentDescription = null, tint = brown)
+                },
+                trailingIcon = {
+                    val imageRes = if (isPasswordVisible) R.drawable.visibility else R.drawable.visibility_off
+                    IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                        Icon(painter = painterResource(id = imageRes), contentDescription = null, tint = brown)
+                    }
+                },
+                visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation()
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+
             AppButton(
                 text = "Create Account",
-                onClick = { /* ViewModel Call */ },
+                onClick = {
+                    viewModel.onEvent(SingupEvent.SignupClicked)
+                },
+                enabled = uiState.isFormValid && !uiState.isLoading,
+                isLoading = uiState.isLoading,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -239,8 +273,6 @@ fun SignupScreen(
             AppButton(
                 text = "Signup with Google",
                 onClick = { /* Google Auth Logic */ },
-                enabled = uiState.isFormValid && !uiState.isLoading,
-                isLoading = uiState.isLoading,
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = {
 
