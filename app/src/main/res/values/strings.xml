@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">PoultryMandi</string>
+
+    <string name="hindi">हिन्दी</string>
+    <string name="english">English</string>
 </resources>
