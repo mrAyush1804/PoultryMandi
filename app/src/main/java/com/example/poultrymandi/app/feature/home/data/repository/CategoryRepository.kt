@@ -8,4 +8,4 @@ class CategoryRepository {
     fun getCategories(): List<CategoryModel> {
         return Category.values().map { it.toModel() }
     }
-}g
+}
