@@ -2,12 +2,11 @@ package com.example.poultrymandi.app.Core.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.poultrymandi.app.feature.Splash.presentation.SplashScreen
+import com.example.poultrymandi.app.feature.Splash.SplashScreen
 import com.example.poultrymandi.app.feature.auth.presentation.login.LoginRoute
 import com.example.poultrymandi.app.feature.auth.presentation.singup.SignUpRoute
 

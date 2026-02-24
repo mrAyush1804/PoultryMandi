@@ -1,4 +1,4 @@
-package com.example.poultrymandi.app.feature.Splash.presentation
+package com.example.poultrymandi.app.feature.Splash
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,17 +14,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.BlendMode.Companion.Color
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.poultrymandi.R
-import com.example.poultrymandi.app.Core.ui.animation.TwinLinesAnimationWrapper
-import com.example.poultrymandi.app.Core.ui.theme.BlackC
 import com.example.poultrymandi.app.Core.ui.theme.Coustemyellow
-import com.example.poultrymandi.app.Core.ui.theme.brown
 
 
 @Composable

@@ -5,7 +5,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.poultrymandi.app.feature.Splash.presentation.SplashScreen
 import com.example.poultrymandi.app.feature.auth.presentation.signup.SignupScreen
 
 

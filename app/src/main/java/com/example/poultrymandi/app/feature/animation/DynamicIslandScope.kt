@@ -28,7 +28,7 @@ import kotlin.math.roundToInt
 // ─────────────────────────────────────────────────────────────
 //  DynamicIslandScope — close() method content ke andar milega
 // ─────────────────────────────────────────────────────────────
-class DynamicIslandScope(
+class DynamicIslandScopePoutry(
     val progress: Float,         // 0f = collapsed, 1f = fully expanded
     private val onClose: () -> Unit
 ) {
@@ -64,20 +64,27 @@ fun DynamicIsland(
 
     // ── Visuals ───────────────────────────────────────────────
     backgroundBrush: Brush = Brush.linearGradient(
-        colors = listOf(Color(0xFF1E0A3C), Color(0xFF7C3AED)),
-        start  = Offset(0f, 0f),
-        end    = Offset(0f, Float.POSITIVE_INFINITY)
+        colors = listOf(
+            Color(0xFFB2EBF2),  // Light Ice Blue
+            Color(0xFF80DEEA),  // Aqua Frost
+            Color(0xFFE0F7FA)   // Icy White
+        ),
+        start = Offset(0f, 0f),
+        end = Offset(0f, Float.POSITIVE_INFINITY)
     ),
     borderBrush: Brush = Brush.sweepGradient(
         listOf(
-            Color(0xFF7C3AED), Color(0xFFC084FC),
-            Color(0xFF38BDF8), Color(0xFF818CF8), Color(0xFF7C3AED)
+            Color(0xFFFFFFFF),  // Pure Shine
+            Color(0xFFB3E5FC),  // Ice Blue
+            Color(0xFF81D4FA),  // Sky Ice
+            Color(0xFF4FC3F7),  // Cold Aqua
+            Color(0xFFFFFFFF)   // Shine Loop
         )
     ),
 
     // ── Content slots ─────────────────────────────────────────
     collapsedContent: @Composable BoxScope.() -> Unit,
-    expandedContent: @Composable BoxScope.(scope: DynamicIslandScope) -> Unit,
+    expandedContent: @Composable BoxScope.(scope: DynamicIslandScopePoutry) -> Unit,
 
     // ── Callbacks ─────────────────────────────────────────────
     onProgressChange: (Float) -> Unit = {}
@@ -162,7 +169,7 @@ fun DynamicIsland(
 
         // expanded content — fades in after ~40% open
         val expandedAlpha = ((smoothProgress - 0.35f) * 3f).coerceIn(0f, 1f)
-        val islandScope   = DynamicIslandScope(
+        val islandScope   = DynamicIslandScopePoutry(
             progress = smoothProgress,
             onClose  = { scope.launch { dragState.animateTo(BlobState.Collapsed) } }
         )

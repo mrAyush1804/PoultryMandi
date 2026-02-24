@@ -49,30 +49,30 @@ fun FlipDateCard(
             .width(58.dp)
             .height(72.dp)
             .graphicsLayer {
-                rotationY = rotation        // ✅ Y axis flip
+                rotationY = rotation
                 cameraDistance = 12f * density
             }
             .clip(RoundedCornerShape(14.dp))
             .background(
                 when {
-                    isSelected          -> brown                    // Selected = brown
-                    !dateItem.isAvailable -> Color(0xFFF0F0F0)     // Unavailable = light grey
-                    else                -> Color.White              // Available = white
+                    isSelected -> brown
+                    !dateItem.isAvailable -> Color(0xFFF0F0F0)
+                    else -> Color.White
                 }
             )
             .border(
                 width = 1.dp,
                 color = when {
-                    isSelected          -> brown.copy(alpha = 0.7f)
+                    isSelected -> brown.copy(alpha = 0.7f)
                     !dateItem.isAvailable -> Color(0xFFE0E0E0)
-                    else                -> Color(0xFFD0D0D0)
+                    else -> Color(0xFFD0D0D0)
                 },
                 shape = RoundedCornerShape(14.dp)
             )
             .clickable(
-                enabled = dateItem.isAvailable  // ✅ Unavailable = click nahi hoga
+                enabled = dateItem.isAvailable
             ) { onClick() }
-            .alpha(if (dateItem.isAvailable) 1f else 0.4f), // ✅ Unavailable = faded
+            .alpha(if (dateItem.isAvailable) 1f else 0.4f),
         contentAlignment = Alignment.Center
     ) {
 
@@ -105,10 +105,7 @@ fun FlipDateCard(
                     )
                 }
             }
-        }
-
-
-        else {
+        } else {
             Box(
                 modifier = Modifier.graphicsLayer { rotationY = 180f },
                 contentAlignment = Alignment.Center
