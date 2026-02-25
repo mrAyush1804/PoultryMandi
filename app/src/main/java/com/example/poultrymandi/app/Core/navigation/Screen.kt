@@ -20,5 +20,13 @@ sealed class Screen {
     object SignUp : Screen()
 
     @Serializable
+    object Notifications : Screen()
+
+      @Serializable
+      object Profile : Screen()
+
+
+
+    @Serializable
     data class Dashboard(val userId: String = "") : Screen()
 }

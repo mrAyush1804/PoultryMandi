@@ -88,7 +88,7 @@ fun ProfileScreen(
             item {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.Start
+                    horizontalAlignment = Alignment.Center as Alignment.Horizontal
                 ) {
                     Text(
                         "Language Settings",
@@ -96,6 +96,7 @@ fun ProfileScreen(
                         fontWeight = FontWeight.Bold,
                         color = BlackC,
                         modifier = Modifier.padding(bottom = 12.dp)
+
                     )
                     AppToggle(
                         option = uiState.languages,

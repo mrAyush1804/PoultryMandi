@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import com.example.poultrymandi.app.feature.Splash.SplashScreen
 import com.example.poultrymandi.app.feature.auth.presentation.login.LoginRoute
 import com.example.poultrymandi.app.feature.auth.presentation.singup.SignUpRoute
+import com.example.poultrymandi.app.feature.home.presentation.HomeRoute
 
 
 @Composable
@@ -45,12 +46,22 @@ fun AppNavigation(navController: NavHostController) {
         composable<Screen.SignUp> {
             SignUpRoute(
                onNavigateToLogin = {
-                   navController.navigate(Screen.Login)
+                   navController.navigate(Screen.Home)
                },
                onSignUpSuccess = { userId ->
                    navController.navigate(Screen.Dashboard(userId))
                }
             )
+        }
+
+        composable<Screen.Home>{
+            HomeRoute(
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login)
+                },
+                onNavigateToSignUp = {}
+            )
+
         }
     }
 }

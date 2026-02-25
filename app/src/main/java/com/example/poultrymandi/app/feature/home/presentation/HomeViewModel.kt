@@ -26,17 +26,30 @@ class HomeViewModel @Inject constructor() : ViewModel() {
         loadInitialData()
     }
 
+    fun onEvent(event: HomeScreenEvent) {
+        when (event) {
+            is HomeScreenEvent.DateSelected -> onDateSelected(event.date)
+            is HomeScreenEvent.CategorySelected -> onCategorySelected(event.category)
+            is HomeScreenEvent.LanguageSelected -> onLanguageSelected(event.language)
+            is HomeScreenEvent.StateSelected -> onStateSelected(event.state)
+            is HomeScreenEvent.CityClicked -> onCityClick(event.marketRate)
+            HomeScreenEvent.DynamicIslandClosed -> closeDynamicIsland()
+
+        }
+
+    }
+
     private fun loadInitialData() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
             val dummyDates = listOf(
-                DataItem(11, "Mon", "September", 2023, "2023-09-11", isAvailable = false),
-                DataItem(12, "Tue", "September", 2023, "2023-09-12", isAvailable = false),
+                DataItem(11, "Mon", "September", 2023, "2023-09-11", isAvailable = true),
+                DataItem(12, "Tue", "September", 2023, "2023-09-12", isAvailable = true),
                 DataItem(13, "Wed", "September", 2023, "2023-09-13", isAvailable = true),
                 DataItem(14, "Thu", "September", 2023, "2023-09-14", isAvailable = true),
                 DataItem(15, "Fri", "September", 2023, "2023-09-15", isAvailable = true),
-                DataItem(16, "Sat", "September", 2023, "2023-09-16", isAvailable = false),
+                DataItem(16, "Sat", "September", 2023, "2023-09-16", isAvailable = true),
             )
 
             val dummyCategories = listOf(

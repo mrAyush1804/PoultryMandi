@@ -15,6 +15,7 @@ import com.example.poultrymandi.app.Core.ui.animation.TwinLinesAnimationWrapper
 import com.example.poultrymandi.app.Core.ui.theme.PoultryMandiTheme
 import com.example.poultrymandi.app.feature.auth.presentation.login.LoginScreen
 import com.example.poultrymandi.app.feature.auth.presentation.signup.SignupScreen
+import com.example.poultrymandi.app.feature.home.presentation.HomeScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

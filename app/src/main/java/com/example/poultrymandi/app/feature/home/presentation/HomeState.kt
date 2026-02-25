@@ -17,5 +17,21 @@ data class HomeState(
     val selectedCityRate: MarketRateDomain? = null,
     val selectedLanguage: String = "Eng",
     val isLoading: Boolean = false,
+    val loginSuccess: Boolean = false,
     val error: String? = null
 )
+
+
+sealed class HomeScreenEvent{
+
+    data class DateSelected(val date: DataItem) : HomeScreenEvent()
+    data class CategorySelected(val category: CategoryDomain) : HomeScreenEvent()
+    data class StateSelected(val state: StateDomain) : HomeScreenEvent()
+
+     data class CityClicked(val marketRate: MarketRateDomain) : HomeScreenEvent()
+    object DynamicIslandClosed : HomeScreenEvent()
+    data class LanguageSelected(val language: String) : HomeScreenEvent()
+
+}
+
+

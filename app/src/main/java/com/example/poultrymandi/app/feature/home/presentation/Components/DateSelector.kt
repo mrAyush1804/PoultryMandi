@@ -71,7 +71,7 @@ fun DateSelector(
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     )
                 } else {
-                    // Nothing — placeholder space
+
                     Spacer(Modifier.width(80.dp))
                 }
             }

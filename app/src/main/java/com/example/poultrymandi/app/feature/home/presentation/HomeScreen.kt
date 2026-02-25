@@ -5,13 +5,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,102 +19,129 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.poultrymandi.R
+import com.example.poultrymandi.app.Core.navigation.BottomNavScreen
+import com.example.poultrymandi.app.Core.ui.components.PoultryBottomBar
 import com.example.poultrymandi.app.feature.animation.DynamicIsland
 import com.example.poultrymandi.app.feature.home.domain.data.MarketRateDomain
 import com.example.poultrymandi.app.feature.home.presentation.Components.*
 
-
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = hiltViewModel()
+    state: HomeState,
+    onEvent: (HomeScreenEvent) -> Unit,
+    onNavigateToNotifications: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {},
+    onLoginClick: () -> Unit = {},
+    onSignUpClick: () -> Unit = {},
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val bottomScreens = listOf(
+        BottomNavScreen.Home,
+        BottomNavScreen.Notifications,
+        BottomNavScreen.Profile
+    )
+
+    val listState = rememberLazyListState()
+    
+
+    val isBottomBarVisible by remember(state.showDynamicIsland, listState.isScrollInProgress) {
+        derivedStateOf {
+            !state.showDynamicIsland && !listState.isScrollInProgress
+        }
+    }
 
     Scaffold(
         containerColor = colorResource(id = R.color.white),
-        bottomBar = { }
+        bottomBar = {
+            // PoultryBottomBar internally handles AnimatedVisibility based on isVisible
+            PoultryBottomBar(
+                screens = bottomScreens,
+                currentRoute = BottomNavScreen.Home.route,
+                isVisible = isBottomBarVisible,
+                containerColor = Color.White,
+                onNavigationSelected = { screen ->
+                    when (screen) {
+                        is BottomNavScreen.Home -> {}
+                        is BottomNavScreen.Notifications -> onNavigateToNotifications()
+                        is BottomNavScreen.Profile -> onNavigateToProfile()
+                    }
+                }
+            )
+        }
     ) { paddingValues ->
 
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
                 contentPadding = PaddingValues(16.dp)
             ) {
                 item(key = "header") {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 5.dp)
-                    ) {
+                    Row(modifier = Modifier.padding(horizontal = 5.dp)) {
                         HomeHeader(
-                            selectedLanguage = uiState.selectedLanguage,
-                            onLanguageSelected = { viewModel.onLanguageSelected(it) },
+                            selectedLanguage = state.selectedLanguage,
+                            onLanguageSelected = { onEvent(HomeScreenEvent.LanguageSelected(it)) },
                         )
                     }
                 }
 
                 item(key = "Date") {
                     Spacer(modifier = Modifier.height(10.dp))
-
                     DateSelector(
-                        dates = uiState.dates,
-                        selectedDate = uiState.selectedDate,
-                        onDateSelected = { viewModel.onDateSelected(it) },
+                        dates = state.dates,
+                        selectedDate = state.selectedDate,
+                        onDateSelected = { onEvent(HomeScreenEvent.DateSelected(it)) },
                     )
                 }
 
                 item(key = "category") {
                     Spacer(modifier = Modifier.height(24.dp))
-
                     HomeCategory(
-                        categories = uiState.categories,
-                        selectedCategory = uiState.selectedCategory,
-                        onCategorySelected = { viewModel.onCategorySelected(it) }
+                        categories = state.categories,
+                        selectedCategory = state.selectedCategory,
+                        onCategorySelected = { onEvent(HomeScreenEvent.CategorySelected(it)) }
                     )
                 }
 
                 item(key = "state_selector") {
                     Spacer(modifier = Modifier.height(24.dp))
                     StateSelector(
-                        states = uiState.states,
-                        selectedState = uiState.selectedState,
-                        onStateSelected = { viewModel.onStateSelected(it) }
+                        states = state.states,
+                        selectedState = state.selectedState,
+                        onStateSelected = { onEvent(HomeScreenEvent.StateSelected(it)) }
                     )
                 }
 
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
+                item { Spacer(modifier = Modifier.height(8.dp)) }
 
                 items(
-                    items = uiState.selectedState?.cities ?: emptyList(),
+                    items = state.selectedState?.cities ?: emptyList(),
                     key = { it.city }
                 ) { marketRate ->
                     MarketRateCard(
                         marketRate = marketRate,
-
-                        onCityClick = { viewModel.onCityClick(marketRate) }
+                        onCityClick = { onEvent(HomeScreenEvent.CityClicked(marketRate)) }
                     )
                 }
             }
 
-            if (uiState.showDynamicIsland && uiState.selectedCityRate != null) {
+            if (state.showDynamicIsland && state.selectedCityRate != null) {
                 DynamicIsland(
                     collapsedContent = {
                         Text(
-                            text = "${uiState.selectedCityRate?.city} Rates",
+                            text = "${state.selectedCityRate?.city} Rates",
                             color = Color.White,
                             fontWeight = FontWeight.Bold
                         )
                     },
                     expandedContent = { scope ->
                         DynamicIslandContent(
-                            rate = uiState.selectedCityRate!!,
+                            rate = state.selectedCityRate!!,
                             onClose = {
                                 scope.close()
-                                viewModel.closeDynamicIsland()
+                                onEvent(HomeScreenEvent.DynamicIslandClosed)
                             }
                         )
                     }
@@ -144,22 +170,21 @@ fun DynamicIslandContent(
                 text = "${rate.city} Market",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = Color.White
             )
             Text(
                 text = "Close",
-                color = Color.Black.copy(alpha = 0.7f),
+                color = Color.White.copy(alpha = 0.7f),
                 modifier = Modifier.clickable { onClose() }
             )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-
         Row(modifier = Modifier.fillMaxWidth()) {
-            Text("Day", Modifier.weight(1f), color = Color.Black, fontSize = 12.sp)
-            Text("Price", Modifier.weight(1f), color = Color.Black, fontSize = 12.sp)
-            Text("Trend", Modifier.weight(1f), color = Color.Black, fontSize = 12.sp)
+            Text("Day", Modifier.weight(1f), color = Color.Gray, fontSize = 12.sp)
+            Text("Price", Modifier.weight(1f), color = Color.Gray, fontSize = 12.sp)
+            Text("Trend", Modifier.weight(1f), color = Color.Gray, fontSize = 12.sp)
         }
         
         HorizontalDivider(Modifier.padding(vertical = 8.dp), color = Color.White.copy(alpha = 0.1f))
@@ -183,8 +208,8 @@ fun DynamicIslandContent(
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 Text("Today's Change", color = Color.White.copy(alpha = 0.7f))
                 Text(
-                    text = "${if (diff >= 0) "+" else ""}${ "%.2f".format(diff)}",
-                    color = if (diff >= 0) Color(0xFF03A9F4) else Color(0xFFCDDC39),
+                    text = "${if (diff >= 0) "+" else ""}${"%.2f".format(diff)}",
+                    color = if (diff >= 0) Color(0xFF4CAF50) else Color(0xFFF44336),
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -209,7 +234,7 @@ fun IslandRateRow(label: String, price: Double, isToday: Boolean = false) {
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, Modifier.weight(1f), color = if (isToday) Color.Black else Color.Black.copy(alpha = 0.6f))
+        Text(label, Modifier.weight(1f), color = if (isToday) Color.White else Color.White.copy(alpha = 0.6f))
         Text("₹ ${"%.2f".format(price)}", Modifier.weight(1f), color = Color.White, fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal)
         Box(Modifier.weight(1f)) {
             if (isToday) {
@@ -222,5 +247,8 @@ fun IslandRateRow(label: String, price: Double, isToday: Boolean = false) {
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun previewHomeScreen() {
-    HomeScreen()
+    HomeScreen(
+        state = HomeState(),
+        onEvent = {}
+    )
 }

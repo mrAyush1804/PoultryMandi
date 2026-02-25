@@ -25,7 +25,7 @@ fun SignUpRoute(
 
     SignupScreen(
         viewModel = viewModel,
-        onLoginClick = { onNavigateToLogin },
+        onLoginClick =  onNavigateToLogin,
         onSignupSuccess = { onSignUpSuccess("newUser123") },
 
     )
