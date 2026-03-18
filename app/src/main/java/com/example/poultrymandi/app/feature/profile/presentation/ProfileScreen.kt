@@ -1,5 +1,8 @@
 package com.example.poultrymandi.app.feature.profile.presentation
 
+import android.content.Context
+import android.net.Uri
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Spring
@@ -26,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -44,6 +48,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
     onBackClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     val bgColor = Color(0xFFF8F9FA)
 
@@ -88,7 +93,7 @@ fun ProfileScreen(
             item {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.Center as Alignment.Horizontal
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         "Language Settings",
@@ -110,12 +115,32 @@ fun ProfileScreen(
 
             // Menu Options with Animation
             val menuItems = listOf(
-                ProfileMenuOption("Farm Details", "Manage sheds, flock count, and equipment", Icons.Default.AccountCircle),
-                ProfileMenuOption("Market Preferences", "Favorite buyers, preferred trading zones", Icons.Default.Face),
-                ProfileMenuOption("Notifications", "Price alerts, order status updates", Icons.Default.Notifications),
-                ProfileMenuOption("Help & Support", "Contact us, FAQs, User guide", Icons.Default.Star),
-                ProfileMenuOption("About Us", "Know more about PoultryMandi", Icons.Default.Info),
-                ProfileMenuOption("Privacy Policy", "Read our terms and conditions", Icons.Default.AccountBox)
+                ProfileMenuOption("Farm Details", "Manage sheds, flock count, and equipment", R.drawable.details,
+                    onClick = {
+                        openCustomTab(context , url = "https://poultrymandi_info.pagelet.host/privacy")
+                    }),
+                ProfileMenuOption("Market Preferences", "Favorite buyers, preferred trading zones",R.drawable.home),
+                ProfileMenuOption("About ", "Price alerts, order status updates", R.drawable.notification),
+                ProfileMenuOption("Help & Support", "Contact us, FAQs, User guide", R.drawable.outline_support_agent_24,
+                    onClick = {
+                        openCustomTab(context , url = "https://poultrymandi_info.pagelet.host/privacy")
+                    }),
+                ProfileMenuOption("About Us", "Know more about PoultryMandi", R.drawable.about_us,
+                    onClick = {
+                        openCustomTab(context , url = "https://poultrymandi_info.pagelet.host/privacy")
+                    }),
+                ProfileMenuOption("Privacy Policy", "Read our Privacy Policy", R.drawable.privatsy,
+                    onClick = {
+                        openCustomTab(context , url = "https://poultrymandi_info.pagelet.host/privacy")
+                    }),
+                ProfileMenuOption("Terms & Conditions", "Read our terms and conditions", R.drawable.privatsy,
+                    onClick = {
+                        openCustomTab(context, url = "https://poultrymandi_info.pagelet.host/privacy")
+                    }),
+                ProfileMenuOption("Setting", "Read our Setting", R.drawable.outline_settings_heart_24),
+                ProfileMenuOption("How to Use PoultryMandi", "Read our How to Use PoultryMandi", R.drawable.howtouse)
+
+
             )
 
             itemsIndexed(menuItems) { index, item ->
@@ -225,7 +250,7 @@ fun ProfileOptionCard(item: ProfileMenuOption) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable { /* Handle click */ },
+            .clickable {  item.onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -242,7 +267,7 @@ fun ProfileOptionCard(item: ProfileMenuOption) {
                 color = Color(0xFFF1FDF5)
             ) {
                 Icon(
-                    item.icon,
+                    painter = painterResource(id = item.icon),
                     contentDescription = null,
                     tint = Color(0xFF2ECC71),
                     modifier = Modifier.padding(12.dp)
@@ -261,6 +286,8 @@ fun ProfileOptionCard(item: ProfileMenuOption) {
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
+
+
             }
             Icon(
                 Icons.Default.Build,
@@ -304,11 +331,20 @@ fun LogoutButton(onClick: () -> Unit) {
 data class ProfileMenuOption(
     val title: String,
     val subtitle: String,
-    val icon: ImageVector
+    val icon: Int,
+    val  onClick : () -> Unit={}
 )
 
-@Preview(showBackground = true)
+
+fun openCustomTab(context: Context, url: String) {
+    val intent = CustomTabsIntent.Builder()
+        .setShowTitle(true)
+        .build()
+    intent.launchUrl(context, Uri.parse(url))
+}
+
+/*@Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
     ProfileScreen()
-}
+}*/

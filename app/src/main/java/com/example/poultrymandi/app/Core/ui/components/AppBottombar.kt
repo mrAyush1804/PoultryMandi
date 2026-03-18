@@ -17,20 +17,21 @@ import com.example.poultrymandi.app.Core.navigation.Screen
 fun PoultryBottomBar(
     screens: List<BottomNavScreen>,
     currentRoute: Screen?,
-    isVisible: Boolean, // ✅ Visibility control
+    isVisible: Boolean,
     containerColor: Color,
     onNavigationSelected: (BottomNavScreen) -> Unit
 ) {
     AnimatedVisibility(
         visible = isVisible,
-        enter = slideInVertically(initialOffsetY = { it }),  // ✅ Neeche se aayega
-        exit = slideOutVertically(targetOffsetY = { it })    // ✅ Neeche jaayega
+        enter = slideInVertically(initialOffsetY = { it }),
+        exit = slideOutVertically(targetOffsetY = { it })
     ) {
         NavigationBar(
             containerColor = containerColor
         ) {
             screens.forEach { screen ->
                 val isSelected = currentRoute == screen.route
+                val activeColor = if (isSelected) screen.selectedColor else screen.unselectedColor
 
                 NavigationBarItem(
                     selected = isSelected,
@@ -40,21 +41,20 @@ fun PoultryBottomBar(
                             painter = painterResource(id = screen.icon),
                             contentDescription = screen.title,
                             modifier = Modifier.size(24.dp),
-                            tint = Color.Unspecified // ✅ PNG original color
+                            tint = Color.Unspecified
                         )
                     },
                     label = {
                         Text(
                             text = screen.title,
-                            style = MaterialTheme.typography.labelMedium
+                            style = MaterialTheme.typography.labelMedium,
+                                    color = activeColor
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = Color.Unspecified,
                         unselectedIconColor = Color.Unspecified,
-                        selectedTextColor = screen.selectedColor,
-                        unselectedTextColor = screen.unselectedColor,
-                        indicatorColor = Color.Transparent // ✅ Gray circle nahi
+                        indicatorColor = Color.Transparent
                     )
                 )
             }

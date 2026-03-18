@@ -18,7 +18,11 @@ data class SingupState(
     val confirmPasswordError: String?=null,
     val singupSuccess: Boolean = false,
     val successMessage: String? = null,
-    val isSignupSuccess: Boolean = false
+    val isSignupSuccess: Boolean = false,
+
+
+    val isGoogleLoading: Boolean = false,
+    val googleSignInSuccess: Boolean = false,
 
 )
 
@@ -33,6 +37,8 @@ sealed class  SingupEvent{
     data class  ConfirmPasswordChanged(val confirmPassword: String) : SingupEvent()
     object SignupClicked : SingupEvent()
     object ClearError : SingupEvent()
+
+    data class GoogleSignInClicked(val idToken: String) : SingupEvent()
 
 
 }

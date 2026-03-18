@@ -12,7 +12,8 @@ import com.example.poultrymandi.app.feature.auth.presentation.signup.SignupScree
 fun SignUpRoute(
     viewModel: SingupViewModel = hiltViewModel(),
     onNavigateToLogin: () -> Unit,
-    onSignUpSuccess: (userId: String) -> Unit
+    onSignUpSuccess: (userId: String) -> Unit,
+    webClientId: String
 
 ) {
 
@@ -27,6 +28,8 @@ fun SignUpRoute(
         viewModel = viewModel,
         onLoginClick =  onNavigateToLogin,
         onSignupSuccess = { onSignUpSuccess("newUser123") },
+        webClientId = webClientId  // ✅ CHANGE 2 — pass karo
+
 
     )
 

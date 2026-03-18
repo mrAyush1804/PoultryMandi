@@ -1,5 +1,6 @@
 package com.example.poultrymandi.app.Core.ui.components
 
+import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -31,8 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.poultrymandi.R
 import com.example.poultrymandi.app.Core.ui.theme.brown
 
 
@@ -127,6 +133,9 @@ fun AppButton(
     }
 }
 
+
+
+
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun PreviewAppButton() {
@@ -139,4 +148,74 @@ private fun PreviewAppButton() {
         }
     )
 
+}
+
+
+@Composable
+fun CustomButtonTwo(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colors: ButtonColors = ButtonDefaults.buttonColors(),
+    icon: @Composable (() -> Unit)? = null,
+    iconSpacing: Dp = 8.dp,
+    verticalAlignment: Alignment.Vertical? = null,
+    horizontalArrangement: Arrangement.Horizontal? = null,
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        colors = colors,
+    ) {
+        Row(
+            verticalAlignment = verticalAlignment ?: Alignment.CenterVertically,
+            horizontalArrangement = horizontalArrangement ?: Arrangement.Center,
+        ) {
+            icon?.invoke()
+            if (icon != null) {
+                Spacer(modifier = Modifier.width(iconSpacing))
+            }
+            Text(text = text)
+        }
+    }
+}
+
+/*@Preview(showBackground = true)
+@Composable
+fun CustomButtonPreview() {
+    CustomButton(
+        text = "Preview Button",
+        onClick = {}
+    )
+}*/
+
+@Preview(showBackground = true)
+@Composable
+fun CustomButtonWithIconPreview() {
+    val context = LocalContext.current
+    CustomButtonTwo(
+        text = "With Icon",
+        modifier = Modifier
+            .width(200.dp)
+            .fillMaxWidth(),
+        onClick = {
+            Toast.makeText(
+                context,
+                "Button Clicked",
+                Toast.LENGTH_SHORT
+            ).show()
+        },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = colorResource(id = R.color.purple_200),
+            contentColor = colorResource(id = R.color.white)
+        ),
+        icon = {
+            androidx.compose.material3.Icon(
+                imageVector = androidx.compose.material.icons.Icons.Filled.Favorite,
+                contentDescription = "Favorite"
+            )
+        }
+    )
 }

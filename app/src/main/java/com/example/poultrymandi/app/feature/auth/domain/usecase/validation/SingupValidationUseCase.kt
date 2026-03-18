@@ -1,19 +1,9 @@
 package com.example.poultrymandi.app.feature.auth.domain.usecase.validation
 
-import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-
-
-
 
 class SingupValidationUseCase @Inject constructor() {
 
-
-
-    /**
-     * Name validate karo
-     * FieldValidator.validateName() use kar rahe ho
-     */
     fun validateName(name: String): ValidationResult {
         return FieldValidator.validateName(name)
     }
@@ -22,49 +12,31 @@ class SingupValidationUseCase @Inject constructor() {
         return FieldValidator.validateOccupation(occupation)
     }
 
-
-    /**
-     * Email validate karo
-     * FieldValidator.validateEmail() use kar rahe ho
-     *
-     * Same function jo LoginValidationUseCase use karta hai!
-     * Reusable ✓
-     */
     fun validateEmail(email: String): ValidationResult {
         return FieldValidator.validateEmail(email)
     }
 
-    /**
-     * Phone validate karo
-     * FieldValidator.validatePhone() use kar rahe ho
-     */
     fun validatePhone(phone: String): ValidationResult {
         return FieldValidator.validatePhone(phone)
     }
 
-    /**
-     * Password validate karo
-     * FieldValidator.validatePassword() use kar rahe ho
-     *
-     * Same function jo LoginValidationUseCase use karta hai!
-     * Reusable ✓
-     */
     fun validatePassword(password: String): ValidationResult {
         return FieldValidator.validatePassword(password)
     }
 
-    /**
-     * Confirm password validate karo
-     * FieldValidator.validateConfirmPassword() use kar rahe ho
-     */
     fun validateConfirmPassword(password: String, confirmPassword: String): ValidationResult {
-        return FieldValidator.validateConfirmPassword(password, confirmPassword)
+        // Confirm password abhi type hi nahi kiya → koi error nahi
+        if (confirmPassword.isBlank()) return ValidationResult.Success
+
+        // Dono filled hain → ab check karo match karte hain ya nahi
+        return if (password == confirmPassword) {
+            ValidationResult.Success
+        } else {
+            ValidationResult.Error("Passwords match nahi kar rahe ")
+        }
     }
 
-    /**
-     * Pura signup form validate karo
-     * Sab fields ko check karo
-     */
+
     fun validateSignupForm(
         name: String,
         email: String,
@@ -73,34 +45,47 @@ class SingupValidationUseCase @Inject constructor() {
         password: String,
         confirmPassword: String
     ): SingupValidationResult {
+
         val nameValidation = validateName(name)
-        val emailValidation = validateEmail(email)
-        val phoneValidation = validatePhone(phone)
         val occupationValidation = validateOccupation(occupation)
         val passwordValidation = validatePassword(password)
         val confirmPasswordValidation = validateConfirmPassword(password, confirmPassword)
+
+        // ✅ CHANGE — Email OR Phone, jo bhi diya ho sirf usko validate karo
+        val emailValidation = if (email.isNotBlank()) {
+            validateEmail(email)        // email diya → validate karo
+        } else {
+            ValidationResult.Success    // email nahi diya → ignore karo
+        }
+
+        val phoneValidation = if (phone.isNotBlank()) {
+            validatePhone(phone)        // phone diya → validate karo
+        } else {
+            ValidationResult.Success    // phone nahi diya → ignore karo
+        }
+
+        // ✅ CHANGE — Ek toh hona chahiye (dono blank nahi ho sakte)
+        val hasEmailOrPhone = email.isNotBlank() || phone.isNotBlank()
+
+        val isFormValid = hasEmailOrPhone &&
+                nameValidation is ValidationResult.Success &&
+                emailValidation is ValidationResult.Success &&
+                phoneValidation is ValidationResult.Success &&
+                occupationValidation is ValidationResult.Success &&
+                passwordValidation is ValidationResult.Success &&
+                confirmPasswordValidation is ValidationResult.Success
 
         return SingupValidationResult(
             nameValidation = nameValidation,
             emailValidation = emailValidation,
             phoneValidation = phoneValidation,
-            occupationValidation=occupationValidation,
+            occupationValidation = occupationValidation,
             passwordValidation = passwordValidation,
             confirmPasswordValidation = confirmPasswordValidation,
-            isFormValid = listOf(
-                nameValidation,
-                emailValidation,
-                phoneValidation,
-                occupationValidation,
-                passwordValidation,
-                confirmPasswordValidation
-            ).all { it is ValidationResult.Success }
+            isFormValid = isFormValid
         )
     }
 
-    /**
-     * Check karo ki pura form valid hai ya nahi
-     */
     fun isSignupFormValid(
         name: String,
         email: String,
@@ -109,8 +94,6 @@ class SingupValidationUseCase @Inject constructor() {
         password: String,
         confirmPassword: String
     ): Boolean {
-        return validateSignupForm(name, email, phone, occupation , password, confirmPassword).isFormValid
+        return validateSignupForm(name, email, phone, occupation, password, confirmPassword).isFormValid
     }
-
-
 }

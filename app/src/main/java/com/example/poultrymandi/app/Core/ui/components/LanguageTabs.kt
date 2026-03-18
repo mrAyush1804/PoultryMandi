@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.poultrymandi.app.Core.ui.theme.brown
@@ -19,6 +20,8 @@ import com.example.poultrymandi.app.Core.ui.theme.brown
  * A common reusable component for language selection tabs.
  * Displays English, Hindi, and Marathi options.
  */
+
+
 @Composable
 fun LanguageTabs(
     selectedLanguage: String,

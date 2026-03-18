@@ -39,8 +39,10 @@ import com.example.poultrymandi.app.feature.notification.domian.model.Notificati
 @Composable
 fun NotificationScreen(
     viewModel: NotificationViewModel = hiltViewModel(),
-    onBackClick: () -> Unit = {}
-) {
+    onBackClick: () -> Unit = {},
+    onNavigateToProfile: () -> Unit,
+
+    ) {
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
@@ -251,10 +253,4 @@ fun EmptyNotificationView() {
             color = Color.LightGray
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun NotificationScreenPreview() {
-    NotificationScreen()
 }

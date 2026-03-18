@@ -1,16 +1,21 @@
 package com.example.poultrymandi.app.feature.profile.presentation
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.poultrymandi.app.feature.profile.domain.model.UserProfile
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor() : ViewModel() {
+class ProfileViewModel @Inject constructor(
+    private val firestore: FirebaseFirestore
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileState())
     val uiState: StateFlow<ProfileState> = _uiState.asStateFlow()
@@ -20,7 +25,7 @@ class ProfileViewModel @Inject constructor() : ViewModel() {
     }
 
     private fun loadUserProfile() {
-        // Mock data for the profile
+
         val mockProfile = UserProfile(
             name = "Rajesh Kumar",
             role = "Poultry Farmer since 2018",
@@ -37,4 +42,8 @@ class ProfileViewModel @Inject constructor() : ViewModel() {
     fun logout() {
 
     }
+
+
+
+
 }

@@ -5,13 +5,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.poultrymandi.app.Core.navigation.Screen
 
 
 @Composable
 fun HomeRoute(
     viewmodel: HomeViewModel = hiltViewModel(),
-    onNavigateToLogin: () -> Unit,
-    onNavigateToSignUp: () -> Unit,
+    currentRoute: Screen,
+    onBottomBarVisibilityChanged: (Boolean) -> Unit = {},
+    onNavigateToNotifications: () -> Unit,
+    onNavigateToProfile: () -> Unit
 ) {
 
     val uiState by viewmodel.uiState.collectAsState()
@@ -27,8 +30,10 @@ fun HomeRoute(
         onEvent = { event ->
             viewmodel.onEvent(event)
         },
-        onLoginClick = onNavigateToLogin,
-        onSignUpClick = onNavigateToSignUp,
+        currentRoute = currentRoute,
+        onBottomBarVisibilityChanged = onBottomBarVisibilityChanged,
+
+
 
 
     )

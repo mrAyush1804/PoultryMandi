@@ -1,14 +1,12 @@
 package com.example.poultrymandi.app.Core.navigation
 
-
-
 import kotlinx.serialization.Serializable
 
 @Serializable
 sealed class Screen {
 
     @Serializable
-     object Splash : Screen()
+    object Splash : Screen()
 
     @Serializable
     object Home : Screen()
@@ -20,12 +18,16 @@ sealed class Screen {
     object SignUp : Screen()
 
     @Serializable
+    object CompleteProfile : Screen()
+
+    @Serializable
     object Notifications : Screen()
 
-      @Serializable
-      object Profile : Screen()
+    @Serializable
+    object Profile : Screen()
 
-
+    @Serializable
+    object HomeBottomNavigationScreenHolder : Screen()
 
     @Serializable
     data class Dashboard(val userId: String = "") : Screen()

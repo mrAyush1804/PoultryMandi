@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1041518266095",
+    "project_id": "poultrymandi",
+    "storage_bucket": "poultrymandi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1041518266095:android:af9449de7e0632405c7d1a",
+        "android_client_info": {
+          "package_name": "com.example.poultrymandi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5A-uU1tLWgx2z2lkjg_tYXgLXR4vjlFg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

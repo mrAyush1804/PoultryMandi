@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.poultrymandi.app.Core.ui.theme.brown
@@ -128,7 +129,9 @@ fun AppEditText(
 }
 
 
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
+
 fun AppEditTextPreview() {
 
     var textState by remember { mutableStateOf("") }

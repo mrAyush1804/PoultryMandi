@@ -24,11 +24,6 @@ import com.example.poultrymandi.app.Core.ui.components.CustomInputType
 import com.example.poultrymandi.app.Core.ui.components.CustomTextFieldState
 import com.example.poultrymandi.app.Core.ui.theme.brown
 
-
-
-
-
-
 @Composable
 fun LoginScreen(
     uiState: LoginState,
@@ -108,7 +103,8 @@ fun LoginScreen(
                             tint = Color(0xFFC62828),
                             modifier = Modifier
                                 .size(20.dp)
-                                .clickable { onEvent(LoginEvent.ClearError)
+                                .clickable {
+                                    onEvent(LoginEvent.ClearError)
                                 }
                         )
                     }
@@ -170,7 +166,8 @@ fun LoginScreen(
                     )
                 },
                 trailingIcon = {
-                    val imageRes = if (isPasswordVisible) R.drawable.visibility else R.drawable.visibility_off
+                    val imageRes =
+                        if (isPasswordVisible) R.drawable.visibility else R.drawable.visibility_off
 
                     IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                         Icon(

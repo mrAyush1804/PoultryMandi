@@ -1,5 +1,10 @@
 package com.example.poultrymandi.app.feature.auth.presentation.signup
 
+import android.app.Activity
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,12 +17,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.poultrymandi.R
 import com.example.poultrymandi.app.Core.ui.components.AppButton
 import com.example.poultrymandi.app.Core.ui.components.AppEditText
@@ -27,23 +34,73 @@ import com.example.poultrymandi.app.Core.ui.theme.BlackC
 import com.example.poultrymandi.app.Core.ui.theme.brown
 import com.example.poultrymandi.app.feature.auth.presentation.singup.SingupEvent
 import com.example.poultrymandi.app.feature.auth.presentation.singup.SingupViewModel
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.Identity
 
 
 @Composable
 fun SignupScreen(
-    viewModel: SingupViewModel = viewModel(),
+    viewModel: SingupViewModel = hiltViewModel(),
     onLoginClick: () -> Unit = {},
-    onSignupSuccess: () -> Unit = {}
+    onSignupSuccess: () -> Unit = {},
+    webClientId: String
 ) {
 
+
+
+
     val uiState by viewModel.uiState.collectAsState()
-    var contactInput by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
-
-
     val isPhone = uiState.email.all { it.isDigit() } && uiState.email.isNotEmpty()
+    val context = LocalContext.current
     val currentInputType = if (isPhone) CustomInputType.Phone else CustomInputType.Email
+
+    if (uiState.singupSuccess) {
+        EmailSentSuccessScreen(email = uiState.email)
+        return
+    }
+
+    LaunchedEffect(uiState.googleSignInSuccess) {
+        if (uiState.googleSignInSuccess) {
+            onSignupSuccess()
+        }
+    }
+
+    val oneTapClient = remember { Identity.getSignInClient(context) }
+
+    val signInRequest = remember {
+        BeginSignInRequest.builder()
+            .setGoogleIdTokenRequestOptions(
+                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                    .setSupported(true)
+                    .setServerClientId(webClientId)
+                    .setFilterByAuthorizedAccounts(false)
+                    .build()
+            )
+            .setAutoSelectEnabled(false)
+            .build()
+    }
+
+    val googleLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            try {
+                val credential = oneTapClient.getSignInCredentialFromIntent(result.data)
+                val idToken = credential.googleIdToken
+                if (idToken != null) {
+                    Log.d("SignupScreen", "idToken mila → Google sign in start")
+                    viewModel.onEvent(SingupEvent.GoogleSignInClicked(idToken))
+                } else {
+                    Log.e("SignupScreen", "idToken null aaya")
+                }
+            } catch (e: Exception) {
+                Log.e("SignupScreen", "Google credential error: ${e.message}")
+            }
+        }
+    }
+
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -219,7 +276,7 @@ fun SignupScreen(
                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation()
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
 
             AppEditText(
@@ -228,7 +285,7 @@ fun SignupScreen(
                     viewModel.onEvent(SingupEvent.ConfirmPasswordChanged(it))
                 },
                 label = "Confirm Password",
-                placeholder = "Create a strong password",
+                placeholder = "Re-enter your password",
                 inputType = CustomInputType.Password,
                 errorMessage = uiState.confirmPasswordError,
                 isError = uiState.confirmPasswordError != null,
@@ -272,8 +329,22 @@ fun SignupScreen(
 
             AppButton(
                 text = "Signup with Google",
-                onClick = { /* Google Auth Logic */ },
+                onClick = {
+                    oneTapClient.beginSignIn(signInRequest)
+                        .addOnSuccessListener { result ->
+                            googleLauncher.launch(
+                                IntentSenderRequest.Builder(
+                                    result.pendingIntent.intentSender
+                                ).build()
+                            )
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("SignupScreen", "One Tap failed: ${e.message}")
+                        }
+                },
                 modifier = Modifier.fillMaxWidth(),
+                enabled = !uiState.isGoogleLoading,
+                isLoading = uiState.isGoogleLoading,
                 leadingIcon = {
 
                     Icon(
@@ -300,6 +371,52 @@ fun SignupScreen(
 }
 
 
+@Composable
+fun EmailSentSuccessScreen(email: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Email,
+            contentDescription = null,
+            modifier = Modifier.size(80.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
 
+        Spacer(modifier = Modifier.height(24.dp))
 
+        Text(
+            text = "Email Bhej Diya! ",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Verification link bheja gaya:",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Text(
+            text = email,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Email open karo aur link pe click karo login ke liye",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
+}

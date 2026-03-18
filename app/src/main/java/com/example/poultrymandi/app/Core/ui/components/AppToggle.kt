@@ -28,7 +28,7 @@ fun AppToggle(
     onOptionSelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val BrownColor = Color(0xFF795548) // Direct brown hex
+    val BrownColor = Color(0xFF795548)
 
     Row(
         modifier = modifier
@@ -56,3 +56,5 @@ fun AppToggle(
         }
     }
 }
+
+

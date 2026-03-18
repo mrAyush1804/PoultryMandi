@@ -166,9 +166,3 @@ fun NotificationIslandScreen() {
 
 
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun PreviewDynamicIsland() {
-    // Koi bhi ek screen choose karo
-    NotificationIslandScreen()
-}
