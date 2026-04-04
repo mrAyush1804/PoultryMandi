@@ -15,6 +15,7 @@ fun ProfileScreenRoute(
     currentRoute: Screen = Screen.Profile,
     onNavigateToHome: () -> Unit,
     onNavigateToProfile: () -> Unit,
+    onNavigateToPaperRate: () -> Unit
 ) {
 
     val uiState by viewModel.uiState.collectAsState()

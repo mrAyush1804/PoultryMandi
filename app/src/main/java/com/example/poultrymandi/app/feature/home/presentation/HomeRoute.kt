@@ -14,7 +14,8 @@ fun HomeRoute(
     currentRoute: Screen,
     onBottomBarVisibilityChanged: (Boolean) -> Unit = {},
     onNavigateToNotifications: () -> Unit,
-    onNavigateToProfile: () -> Unit
+    onNavigateToProfile: () -> Unit,
+    onNavigateToPaperRate: () -> Unit
 ) {
 
     val uiState by viewmodel.uiState.collectAsState()

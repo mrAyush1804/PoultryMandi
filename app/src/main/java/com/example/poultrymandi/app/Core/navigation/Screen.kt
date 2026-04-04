@@ -31,4 +31,7 @@ sealed class Screen {
 
     @Serializable
     data class Dashboard(val userId: String = "") : Screen()
+
+    @Serializable
+    object PaperRate : Screen()
 }

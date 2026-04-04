@@ -15,6 +15,9 @@ fun NotficationRoute(
     currentRoute: Screen = Screen.Notifications,
     onNavigateToHome: () -> Unit,
     onNavigateToProfile: () -> Unit,
+    onNavigateToPaperRate: () -> Unit
+
+
 
 
 

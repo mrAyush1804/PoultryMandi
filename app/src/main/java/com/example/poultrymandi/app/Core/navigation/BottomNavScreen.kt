@@ -14,4 +14,5 @@ sealed class BottomNavScreen(
     object Home : BottomNavScreen(Screen.Home, "Home", R.drawable.home__1_)
     object Notifications : BottomNavScreen(Screen.Notifications, "Notifications", R.drawable.notification)
     object Profile : BottomNavScreen(Screen.Profile, "Profile", R.drawable.profile)
+    object PaperRate : BottomNavScreen(Screen.PaperRate, "Paper Rate", R.drawable.paper)
 }

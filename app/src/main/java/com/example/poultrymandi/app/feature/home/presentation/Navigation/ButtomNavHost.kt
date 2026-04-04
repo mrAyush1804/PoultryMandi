@@ -8,6 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.poultrymandi.app.Core.navigation.Screen
+import com.example.poultrymandi.app.feature.PaperRate.presentation.PaperRateRoute
 import com.example.poultrymandi.app.feature.home.presentation.HomeRoute
 import com.example.poultrymandi.app.feature.notification.presentation.NotficationRoute
 import com.example.poultrymandi.app.feature.profile.presentation.ProfileScreenRoute
@@ -36,6 +37,9 @@ fun BottomNavGraph(
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile)
                 },
+                onNavigateToPaperRate = {
+                    navController.navigate(Screen.PaperRate)
+                },
 
                 onBottomBarVisibilityChanged = onBottomBarVisibilityChanged
             )
@@ -55,6 +59,9 @@ fun BottomNavGraph(
                 onNavigateToHome = {
                     navController.navigate(Screen.Home)
                 },
+                onNavigateToPaperRate = {
+                    navController.navigate(Screen.PaperRate)
+                },
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile)
                 }
@@ -71,12 +78,36 @@ fun BottomNavGraph(
                 onNavigateToHome = {
                     navController.navigate(Screen.Home)
                 },
+                onNavigateToPaperRate = {
+                    navController.navigate(Screen.PaperRate)
+                },
                 onNavigateToProfile = {
 
                 }
+
             )
 
 
+
+        }
+        composable<Screen.PaperRate>  {
+            PaperRateRoute(
+                currentRoute = Screen.PaperRate,
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home)
+                },
+                onNavigateToProfile = {
+                    navController.navigate(Screen.Profile)
+                },
+                onNavigateToNotifications = {
+                    navController.navigate(Screen.Notifications)
+                }
+
+
+            )
 
         }
     }

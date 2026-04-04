@@ -21,6 +21,7 @@ fun HomeBottomNavigationScreenHolder() {
     val bottomScreens = listOf(
         BottomNavScreen.Home,
         BottomNavScreen.Notifications,
+        BottomNavScreen.PaperRate,
         BottomNavScreen.Profile
     )
 
@@ -32,6 +33,7 @@ fun HomeBottomNavigationScreenHolder() {
         currentRoute?.contains(Screen.Home::class.qualifiedName ?: "") == true -> Screen.Home
         currentRoute?.contains(Screen.Notifications::class.qualifiedName ?: "") == true -> Screen.Notifications
         currentRoute?.contains(Screen.Profile::class.qualifiedName ?: "") == true -> Screen.Profile
+        currentRoute?.contains(Screen.PaperRate::class.qualifiedName ?: "") == true -> Screen.PaperRate
         else -> Screen.Home
     }
 
@@ -50,6 +52,7 @@ fun HomeBottomNavigationScreenHolder() {
                     val targetRoute = when (screen) {
                         is BottomNavScreen.Home -> Screen.Home
                         is BottomNavScreen.Notifications -> Screen.Notifications
+                        is BottomNavScreen.PaperRate -> Screen.PaperRate
                         is BottomNavScreen.Profile -> Screen.Profile
                         else -> Screen.Home
                     }
