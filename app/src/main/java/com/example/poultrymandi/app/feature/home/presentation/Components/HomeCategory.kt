@@ -126,19 +126,3 @@ fun CategoryChip(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun HomeCategoryPreview() {
-    val dummyCategories = listOf(
-        CategoryDomain("eggs", "Eggs", R.drawable.egg_tongue_face),
-        CategoryDomain("chicken", "Chicken", R.drawable.boiled_chicken),
-        CategoryDomain("broiler", "Broiler", R.drawable.chicken),
-    )
-    Column(Modifier.padding(16.dp)) {
-        HomeCategory(
-            categories = dummyCategories,
-            selectedCategory = dummyCategories[0],
-            onCategorySelected = {category}
-        )
-    }
-}

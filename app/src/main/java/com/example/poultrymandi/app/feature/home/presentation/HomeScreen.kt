@@ -127,20 +127,24 @@ fun HomeScreen(
                     }
                 }
 
-                // City Rate Cards List
+
                 items(
-                    items = state.selectedState?.cities ?: emptyList(),
-                    key = { it.city }
-                ) { marketRate ->
+                    items = state.states,        // ← states list
+                    key = { it.name }            // ← state name as key
+                ) { stateDomain ->
                     MarketRateCard(
-                        marketRate = marketRate,
+                        stateDomain = stateDomain,  // ← NEW parameter
                         selectedCategory = state.selectedCategory?.title ?: "Broiler",
-                        onCityClick = { onEvent(HomeScreenEvent.CityClicked(marketRate)) }
+                        onCityClick = { cityRate ->
+                            onEvent(HomeScreenEvent.CityClicked(cityRate))
+
+                        }
                     )
                 }
             }
 
-            // Dynamic Island - Triggered on City Click
+
+
             if (state.showDynamicIsland && state.selectedCityRate != null) {
                 DynamicIsland(
                     collapsedContent = {

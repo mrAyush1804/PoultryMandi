@@ -1,183 +1,192 @@
 package com.example.poultrymandi.app.feature.home.presentation.Components
 
-import androidx.compose.foundation.Image
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.poultrymandi.app.feature.home.domain.data.MarketRateDomain
+import com.example.poultrymandi.app.feature.home.domain.data.StateDomain
 import kotlin.math.abs
-import com.example.poultrymandi.R
 
-/**
- * Enhanced MarketRateCard - Displays city market rates with category-specific data.
- */
 @Composable
 fun MarketRateCard(
-    marketRate: MarketRateDomain,
+    stateDomain: StateDomain,
     selectedCategory: String = "Broiler",
-    onCityClick: () -> Unit,
+    onCityClick: (MarketRateDomain) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Use category-specific price logic
-    val displayPrice = marketRate.getPriceForCategory(selectedCategory)
-    val displayYesterday = marketRate.getYesterdayPriceForCategory(selectedCategory)
-    val diff = marketRate.getPriceChangeForCategory(selectedCategory)
+    var isExpanded by remember { mutableStateOf(false) }
+    val rotation by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        label = "chevron"
+    )
 
-    val trendColor = when {
-        diff > 0 -> Color(0xFF4CAF50) // Green for increase
-        diff < 0 -> Color(0xFFF44336) // Red for decrease
+    val firstCity = stateDomain.cities.firstOrNull()
+    val displayPrice = firstCity?.getPriceForCategory(selectedCategory) ?: 0.0
+    val headerDiff = firstCity?.getPriceChangeForCategory(selectedCategory) ?: 0.0
+    
+    val headerTrendColor = when {
+        headerDiff > 0 -> Color(0xFF1D9E75)
+        headerDiff < 0 -> Color(0xFFE24B4A)
         else -> Color.Gray
     }
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .clickable { onCityClick() },
-        shape = RoundedCornerShape(20.dp),
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            // City and Today's Main Price
+        Column {
+            // --- Header Row ---
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { isExpanded = !isExpanded }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = marketRate.city,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.ExtraBold,
+                        text = stateDomain.name,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
                     Text(
-                        text = "Last Updated: Just now",
-                        fontSize = 11.sp,
+                        text = "${stateDomain.cities.size} cities • $selectedCategory",
+                        fontSize = 12.sp,
                         color = Color.Gray
                     )
                 }
 
-                Column(horizontalAlignment = Alignment.End) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "₹ ${"%.2f".format(displayPrice)}",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Black,
-                        color = trendColor
+                        text = "₹${"%.2f".format(displayPrice)}",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = headerTrendColor
                     )
-                    Text(
-                        text = marketRate.unit,
-                        fontSize = 10.sp,
-                        color = Color.Gray,
-                        fontWeight = FontWeight.Medium
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = null,
+                        modifier = Modifier.rotate(rotation),
+                        tint = Color.Gray
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-            HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray.copy(alpha = 0.5f))
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Rate Comparison Grid
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            // --- Expanded Section ---
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
             ) {
-                RateStatItem(label = "Yesterday", value = displayYesterday)
-                
-                // Past updated rate - Placeholder logic using diff
-                RateStatItem(label = "Change", value = abs(diff))
-                
-                ComparisonBadge(diff = diff)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                ) {
+                    stateDomain.cities.forEachIndexed { index, city ->
+                        CityRateRow(
+                            city = city,
+                            selectedCategory = selectedCategory,
+                            onClick = { onCityClick(city) }
+                        )
+                        if (index < stateDomain.cities.size - 1) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                thickness = 0.5.dp,
+                                color = Color.LightGray.copy(alpha = 0.4f)
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun RateStatItem(label: String, value: Double) {
-    Column {
-        Text(
-            text = label,
-            fontSize = 11.sp,
-            color = Color.Gray,
-            fontWeight = FontWeight.Medium
-        )
-        Text(
-            text = "₹ ${"%.2f".format(value)}",
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = Color.DarkGray
-        )
-    }
-}
+private fun CityRateRow(
+    city: MarketRateDomain,
+    selectedCategory: String,
+    onClick: () -> Unit
+) {
+    val price = city.getPriceForCategory(selectedCategory)
+    val diff = city.getPriceChangeForCategory(selectedCategory)
 
-@Composable
-private fun ComparisonBadge(diff: Double) {
-    val (color, icon, text) = when {
-        diff > 0 -> Triple(
-            Color(0xFFE8F5E9),
-             R.drawable.trending_up,
-            "+₹${"%.2f".format(abs(diff))} Up"
-        )
-        diff < 0 -> Triple(
-            Color(0xFFFFEBEE),
-             R.drawable.trending_down,
-            "-₹${"%.2f".format(abs(diff))} Down"
-        )
-        else -> Triple(
-            Color(0xFFF5F5F5),
-             R.drawable.trending_flat,
-
-            "Stable"
-        )
-    }
-
-    val contentColor = when {
-        diff > 0 -> Color(0xFF2E7D32)
-        diff < 0 -> Color(0xFFC62828)
+    val trendColor = when {
+        diff > 0 -> Color(0xFF1D9E75)
+        diff < 0 -> Color(0xFFE24B4A)
         else -> Color.Gray
+    }
+
+    val trendText = when {
+        diff > 0 -> "▲ +₹${"%.2f".format(diff)}"
+        diff < 0 -> "▼ -₹${"%.2f".format(abs(diff))}"
+        else -> "— Stable"
     }
 
     Row(
         modifier = Modifier
-            .background(color, RoundedCornerShape(12.dp))
-            .padding(horizontal = 10.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Icon(
-            painter = painterResource(id = icon),
-            contentDescription = null,
-            tint = contentColor,
-            modifier = Modifier.size(14.dp),
-
-        )
-        Spacer(modifier = Modifier.width(4.dp))
         Text(
-            text = text,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            color = contentColor
+            text = city.city,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.Black,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
         )
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Text(
+                    text = "₹${"%.2f".format(price)}",
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Text(
+                text = trendText,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = trendColor,
+                modifier = Modifier.width(85.dp)
+            )
+        }
     }
 }
