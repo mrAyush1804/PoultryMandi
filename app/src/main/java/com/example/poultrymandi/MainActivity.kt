@@ -21,6 +21,7 @@ import com.example.poultrymandi.app.Core.navigation.AppNavigation
 import com.example.poultrymandi.app.Core.ui.animation.TwinLinesAnimationWrapper
 import com.example.poultrymandi.app.Core.ui.theme.PoultryMandiTheme
 import com.example.poultrymandi.app.feature.auth.domain.usecase.Sinupusecase.VerifyEmailLinkUseCase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -110,7 +111,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun fetchFCMToken() {
+ /*   private fun fetchFCMToken() {
         FirebaseMessaging.getInstance().token
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -122,7 +123,7 @@ class MainActivity : ComponentActivity() {
                     Log.e("FCM", "Token fetch failed: ${task.exception?.message}")
                 }
             }
-    }
+    }*/
 
     private fun subscribeToFCMTopic() {
         FirebaseMessaging.getInstance()
@@ -132,6 +133,35 @@ class MainActivity : ComponentActivity() {
                     Log.d("FCM", "Topic 'all_users' subscribed successfully")
                 } else {
                     Log.e("FCM", "Topic subscribe failed: ${task.exception?.message}")
+                }
+            }
+    }
+
+    private fun fetchFCMToken() {
+        FirebaseMessaging.getInstance().token
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val token = task.result
+                    Log.d("FCM", "Token: $token")
+
+
+                    FirebaseFirestore.getInstance()
+                        .collection("fcm_tokens")
+                        .document(token)
+                        .set(mapOf(
+                            "token"     to token,
+                            "updatedAt" to System.currentTimeMillis(),
+                            "platform"  to "android"
+                        ))
+                        .addOnSuccessListener {
+                            Log.d("FCM", "✅ Token saved to Firestore")
+                        }
+                        .addOnFailureListener {
+                            Log.e("FCM", "❌ Token save failed: ${it.message}")
+                        }
+
+                } else {
+                    Log.e("FCM", "Token fetch failed: ${task.exception?.message}")
                 }
             }
     }
