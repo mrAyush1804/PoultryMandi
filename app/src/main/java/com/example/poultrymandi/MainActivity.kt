@@ -59,7 +59,8 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    TwinLinesAnimationWrapper(
+
+                     TwinLinesAnimationWrapper(
                         content = {
                             Box(modifier = Modifier.padding(innerPadding)) {
                                 AppNavigation(navController = navController)
@@ -154,10 +155,10 @@ class MainActivity : ComponentActivity() {
                             "platform"  to "android"
                         ))
                         .addOnSuccessListener {
-                            Log.d("FCM", "✅ Token saved to Firestore")
+                            Log.d("FCM", " Token saved to Firestore")
                         }
                         .addOnFailureListener {
-                            Log.e("FCM", "❌ Token save failed: ${it.message}")
+                            Log.e("FCM", " Token save failed: ${it.message}")
                         }
 
                 } else {

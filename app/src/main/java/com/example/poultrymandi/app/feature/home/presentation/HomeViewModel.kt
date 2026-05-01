@@ -1,12 +1,12 @@
 package com.example.poultrymandi.app.feature.home.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.poultrymandi.R
 import com.example.poultrymandi.app.feature.home.data.model.DataItem
 import com.example.poultrymandi.app.feature.home.domain.data.*
 import com.example.poultrymandi.app.feature.home.domain.repository.RatesRepository
-import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -15,8 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: RatesRepository,
-
+    private val repository: RatesRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeState())
@@ -29,6 +28,15 @@ class HomeViewModel @Inject constructor(
         loadInitialData()
     }
 
+    /**
+     * Helper to get today's date in yyyy-MM-dd format to match Firestore doc IDs.
+     * This ensures Company Rates always reflect live data regardless of DateSelector.
+     */
+    private fun getTodayDateString(): String {
+        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        return sdf.format(java.util.Date())
+    }
+
     fun onEvent(event: HomeScreenEvent) {
         when (event) {
             is HomeScreenEvent.DateSelected -> onDateSelected(event.date)
@@ -37,20 +45,19 @@ class HomeViewModel @Inject constructor(
             is HomeScreenEvent.StateSelected -> onStateSelected(event.state)
             is HomeScreenEvent.CityClicked -> onCityClick(event.marketRate)
             HomeScreenEvent.DynamicIslandClosed -> closeDynamicIsland()
+            else -> {}
         }
     }
 
     private fun loadInitialData() {
         viewModelScope.launch {
-            // ── DATE SECTION ──────────────────────────
-            // Generates last 7 days. Today is auto-selected (last item).
             val dates = repository.getLast7Days()
             val today = dates.lastOrNull()
 
             val dummyCategories = listOf(
-                CategoryDomain("broiler", "Broiler", R.drawable.chicken),
-                CategoryDomain("chicks", "Chicks", R.drawable.boiled_chicken),
                 CategoryDomain("eggs", "Eggs", R.drawable.egg_tongue_face),
+                CategoryDomain("chicken", "Chicken", R.drawable.boiled_chicken),
+                CategoryDomain("broiler", "Broiler", R.drawable.chicken),
             )
 
             _uiState.update { 
@@ -62,23 +69,34 @@ class HomeViewModel @Inject constructor(
                 )
             }
 
-            today?.let { fetchRatesForDate(it.isAvailable1) }
+            today?.let { 
+                fetchRatesForDate(it.isAvailable1)
+                // Pre-load company rates for today (default city or state handled in fetchRatesForDate snapshot)
+                fetchCompanyUpdates(getTodayDateString(), "")
+            }
         }
     }
 
     private fun fetchRatesForDate(dateString: String) {
+        Log.d("HomeViewModel", "Fetching rates for: $dateString")
         ratesJob?.cancel()
         _uiState.update { it.copy(isLoading = true, error = null) }
 
-        // ── STATES SECTION ────────────────────────
-        // Real-time listener on rates/{date}/states sub-collection.
         ratesJob = repository.getRatesForDate(dateString)
             .onEach { states ->
-                _uiState.update { 
-                    it.copy(
+                _uiState.update { currentState ->
+                    val newState = states.find { s -> s.name == currentState.selectedState?.name } ?: states.firstOrNull()
+                    
+                    // Auto-fetch company updates for the first city of the selected state using TODAY's date
+                    newState?.cities?.firstOrNull()?.let { firstCity ->
+                        fetchCompanyUpdates(getTodayDateString(), firstCity.city)
+                    }
+
+                    currentState.copy(
                         isLoading = false,
                         states = states,
-                        selectedState = states.find { s -> s.name == it.selectedState?.name } ?: states.firstOrNull()
+                        selectedState = newState,
+                        selectedCityRate = newState?.cities?.firstOrNull()
                     )
                 }
             }
@@ -102,38 +120,46 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onStateSelected(state: StateDomain) {
-        _uiState.update { it.copy(selectedState = state) }
-    }
-
-    private fun onCityClick(marketRate: MarketRateDomain) {
-        _uiState.update { 
+        val firstCity = state.cities.firstOrNull()
+        _uiState.update {
             it.copy(
-                selectedCityRate = marketRate,
-                showDynamicIsland = true
+                selectedState = state,
+                selectedCityRate = firstCity,
             )
         }
         
-        // ── COMPANY RATES / DYNAMIC ISLAND ────────
-        // Fetched on city click. Real-time updates for history.
-        val dateString = _uiState.value.selectedDate?.isAvailable1 ?: ""
-        fetchCompanyUpdates(dateString, marketRate.city)
+        if (firstCity != null) {
+
+            fetchCompanyUpdates(getTodayDateString(), firstCity.city)
+        }
+    }
+
+    private fun onCityClick(marketRate: MarketRateDomain) {
+        _uiState.update {
+            it.copy(
+                selectedCityRate = marketRate,
+               /* showDynamicIsland = true*/
+            )
+        }
+        // Fix: Always use TODAY's date for company rates
+        fetchCompanyUpdates(getTodayDateString(), marketRate.city)
     }
 
     private fun fetchCompanyUpdates(dateString: String, cityId: String) {
+        if (dateString.isBlank()) return
+        
         companyRatesJob?.cancel()
         companyRatesJob = repository.getCompanyRatesForCity(dateString, cityId)
             .onEach { updates ->
                 _uiState.update { it.copy(historicalRateData = updates) }
             }
             .catch { e ->
-                // Silently log or handle error for dynamic island
+                Log.e("HomeViewModel", "Error in company rates: ${e.message}")
             }
             .launchIn(viewModelScope)
     }
 
     private fun closeDynamicIsland() {
-        companyRatesJob?.cancel()
         _uiState.update { it.copy(showDynamicIsland = false) }
     }
-
 }

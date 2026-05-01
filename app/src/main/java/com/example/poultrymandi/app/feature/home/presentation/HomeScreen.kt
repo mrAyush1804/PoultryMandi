@@ -1,12 +1,20 @@
 package com.example.poultrymandi.app.feature.home.presentation
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,11 +27,13 @@ import androidx.compose.ui.unit.sp
 import com.example.poultrymandi.R
 import com.example.poultrymandi.app.Core.navigation.Screen
 import com.example.poultrymandi.app.feature.animation.DynamicIsland
+import com.example.poultrymandi.app.feature.home.domain.data.MarketRateDomain
 import com.example.poultrymandi.app.feature.home.presentation.Components.*
+import kotlin.math.abs
 
 /**
- * HomeScreen - The main hub for market rates.
- * Real-time Firestore integration with loading and error states.
+ * HomeScreen - Farmer Friendly Redesign.
+ * Single scrollable feed with City Chips and live Company Rates.
  */
 @Composable
 fun HomeScreen(
@@ -34,11 +44,9 @@ fun HomeScreen(
 ) {
     val listState = rememberLazyListState()
 
-    // Manage bottom bar visibility based on scroll and Dynamic Island state
+    // Manage bottom bar visibility
     val isBottomBarVisible by remember(state.showDynamicIsland, listState.isScrollInProgress) {
-        derivedStateOf {
-            !state.showDynamicIsland && !listState.isScrollInProgress
-        }
+        derivedStateOf { !state.showDynamicIsland && !listState.isScrollInProgress }
     }
 
     LaunchedEffect(isBottomBarVisible) {
@@ -46,7 +54,7 @@ fun HomeScreen(
     }
 
     Scaffold(
-        containerColor = colorResource(id = R.color.white),
+        containerColor = Color.White,
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
@@ -56,93 +64,313 @@ fun HomeScreen(
                     .padding(paddingValues),
                 contentPadding = PaddingValues(16.dp)
             ) {
-                // Header Section
-                item(key = "header") {
-                    Row(modifier = Modifier.padding(horizontal = 5.dp)) {
-                        HomeHeader(
-                            selectedLanguage = state.selectedLanguage,
-                            onLanguageSelected = { onEvent(HomeScreenEvent.LanguageSelected(it)) },
-                        )
+                // 1. HEADER
+                item {
+                    HomeHeader(
+                        selectedLanguage = state.selectedLanguage,
+                        onLanguageSelected = { onEvent(HomeScreenEvent.LanguageSelected(it)) },
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                // 🔔 RATE UPDATE ALERT BANNER
+                item(key = "rate_alert") {
+                    val rates = state.historicalRateData
+                    if (rates.size >= 2) {
+                        val latest = rates[0]
+                        val previous = rates[1]
+                        if (latest.rate != previous.rate) {
+                            val diff = latest.rate - previous.rate
+                            val isUp = diff > 0
+                            val bgColor = if (isUp) Color(0xFF1D9E75) else Color(0xFFE24B4A)
+                            val arrow = if (isUp) "▲" else "▼"
+                            val todayDate = remember {
+                                java.text.SimpleDateFormat(
+                                    "dd/MM/yyyy",
+                                    java.util.Locale.getDefault()
+                                ).format(java.util.Date())
+                            }
+
+                            var visible by remember { mutableStateOf(true) }
+
+                            LaunchedEffect(latest.rate) {
+                                visible = true
+                                kotlinx.coroutines.delay(5000)
+                                visible = false
+                            }
+
+                            if (visible) {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = CardDefaults.cardColors(containerColor = bgColor)
+                                ) {
+                                    Column(modifier = Modifier.padding(16.dp)) {
+                                        Text(
+                                            text = "🔔 Rate Updated — $todayDate",
+                                            color = Color.White,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = "${state.selectedCityRate?.city ?: ""}  ${state.selectedCategory?.title ?: ""}  ₹${previous.rate} → ₹${latest.rate}  $arrow ₹${"%.2f".format(abs(diff))}",
+                                            color = Color.White,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
-                // Date Selection Section
-                item(key = "Date") {
-                    Spacer(modifier = Modifier.height(10.dp))
+                // 2. DATE SELECTOR
+                item {
                     DateSelector(
                         dates = state.dates,
                         selectedDate = state.selectedDate,
                         onDateSelected = { onEvent(HomeScreenEvent.DateSelected(it)) },
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // Category Selection Section (Broiler, Eggs, Chick)
-                item(key = "category") {
-                    Spacer(modifier = Modifier.height(24.dp))
+                // 3. CATEGORY SELECTOR
+                item {
                     HomeCategory(
                         categories = state.categories,
                         selectedCategory = state.selectedCategory,
-                        onCategorySelected = { onEvent(HomeScreenEvent.CategorySelected(it)) }
+                        onCategorySelected = { onCategorySelected -> onEvent(HomeScreenEvent.CategorySelected(onCategorySelected)) }
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // State/Location Selector
-                item(key = "state_selector") {
-                    Spacer(modifier = Modifier.height(24.dp))
+                // 4. STATE SELECTOR
+                item {
                     StateSelector(
                         states = state.states,
                         selectedState = state.selectedState,
                         onStateSelected = { onEvent(HomeScreenEvent.StateSelected(it)) }
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                item { Spacer(modifier = Modifier.height(8.dp)) }
-
-                // Loading State
+                // ── LOADING / ERROR ───────────────
                 if (state.isLoading) {
                     item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(32.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
+                        Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator(color = colorResource(id = R.color.purple_500))
                         }
                     }
                 }
 
-                // Error State
                 state.error?.let { errorMsg ->
                     item {
                         Text(
                             text = errorMsg,
                             color = Color.Red,
                             fontSize = 14.sp,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
                     }
                 }
 
-
-                items(
-                    items = state.states,        // ← states list
-                    key = { it.name }            // ← state name as key
-                ) { stateDomain ->
-                    MarketRateCard(
-                        stateDomain = stateDomain,  // ← NEW parameter
-                        selectedCategory = state.selectedCategory?.title ?: "Broiler",
-                        onCityClick = { cityRate ->
-                            onEvent(HomeScreenEvent.CityClicked(cityRate))
-
+                // 5. CITY SELECTOR ROW (NEW)
+                state.selectedState?.let { selectedState ->
+                    item {
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(vertical = 8.dp)
+                        ) {
+                            items(selectedState.cities) { city ->
+                                val isSelected = city.city == state.selectedCityRate?.city
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { onEvent(HomeScreenEvent.CityClicked(city)) },
+                                    label = { Text(city.city) },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = Color(0xFF1D9E75),
+                                        selectedLabelColor = Color.White,
+                                        labelColor = Color.Black
+                                    ),
+                                    border = if (!isSelected) BorderStroke(1.dp, Color.LightGray) else null
+                                )
+                            }
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                }
+
+
+                item(key = "city_rate_card") {
+                    state.selectedCityRate?.let { cityRate ->
+                        val price = cityRate.getPriceForCategory(
+                            state.selectedCategory?.title ?: "Broiler"
+                        )
+                        val diff = cityRate.getPriceChangeForCategory(
+                            state.selectedCategory?.title ?: "Broiler"
+                        )
+                        val isUp = diff > 0
+                        val isDown = diff < 0
+                        val trendColor = when {
+                            isUp -> Color(0xFF1D9E75)
+                            isDown -> Color(0xFFE24B4A)
+                            else -> Color.Gray
+                        }
+                        val arrow = when {
+                            isUp -> "▲"
+                            isDown -> "▼"
+                            else -> "—"
+                        }
+                        val todayDate = remember {
+                            java.text.SimpleDateFormat(
+                                "dd/MM/yyyy", 
+                                java.util.Locale.getDefault()
+                            ).format(java.util.Date())
+                        }
+                        val currentTime = remember(cityRate) {
+                            java.text.SimpleDateFormat(
+                                "hh:mm a", 
+                                java.util.Locale.getDefault()
+                            ).format(java.util.Date())
+                        }
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .clickable { onEvent(HomeScreenEvent.CityClicked(cityRate)) },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
+                                // ── Row 1: City Name + Date ──
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.LocationOn,
+                                            contentDescription = null,
+                                            tint = Color(0xFF4CAF50),
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = cityRate.city,
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black
+                                        )
+                                    }
+                                    Text(
+                                        text = todayDate,
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = Color.Gray
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(12.dp))
+                                HorizontalDivider(color = Color.LightGray.copy(alpha = 0.4f))
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                // ── Row 2: Price + Trend ──
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "₹${"%.2f".format(price)}",
+                                        fontSize = 32.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = trendColor
+                                    )
+                                    Column(horizontalAlignment = Alignment.End) {
+                                        Text(
+                                            text = "$arrow ₹${"%.2f".format(abs(diff))}",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = trendColor
+                                        )
+                                        Text(
+                                            text = "today",
+                                            fontSize = 12.sp,
+                                            color = Color.Gray
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(12.dp))
+                                HorizontalDivider(color = Color.LightGray.copy(alpha = 0.4f))
+                                Spacer(modifier = Modifier.height(8.dp))
+
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Surface(
+                                        color = Color(0xFF4CAF50).copy(alpha = 0.1f),
+                                        shape = RoundedCornerShape(20.dp)
+                                    ) {
+                                        Text(
+                                            text = state.selectedCategory?.title ?: "Broiler",
+                                            modifier = Modifier.padding(
+                                                horizontal = 12.dp, 
+                                                vertical = 4.dp
+                                            ),
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Color(0xFF4CAF50)
+                                        )
+                                    }
+                                    Text(
+                                        text = "Last Updated: $currentTime",
+                                        fontSize = 12.sp,
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 7. COMPANY RATES SECTION
+                item {
+                    Text(
+                        text = "Company Rates — ${state.selectedCityRate?.city ?: ""}",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.Black,
+                        modifier = Modifier.padding(bottom = 12.dp)
                     )
+                    
+                    if (state.historicalRateData.isNotEmpty()) {
+                        CompanyRateTable(rates = state.historicalRateData)
+                    } else {
+                        Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                            Text("Loading company rates...", color = Color.Gray, fontSize = 14.sp)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(80.dp)) 
                 }
             }
-
 
 
             if (state.showDynamicIsland && state.selectedCityRate != null) {
