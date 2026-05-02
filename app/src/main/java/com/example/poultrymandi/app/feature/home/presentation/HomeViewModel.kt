@@ -55,9 +55,9 @@ class HomeViewModel @Inject constructor(
             val today = dates.lastOrNull()
 
             val dummyCategories = listOf(
-                CategoryDomain("eggs", "Eggs", R.drawable.egg_tongue_face),
-                CategoryDomain("chicken", "Chicken", R.drawable.boiled_chicken),
                 CategoryDomain("broiler", "Broiler", R.drawable.chicken),
+                CategoryDomain("chicken", "Chicken", R.drawable.boiled_chicken),
+                CategoryDomain("eggs", "Eggs", R.drawable.egg_tongue_face),
             )
 
             _uiState.update { 
