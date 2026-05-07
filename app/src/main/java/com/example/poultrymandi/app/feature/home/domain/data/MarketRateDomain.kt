@@ -4,9 +4,9 @@ data class CompanyRate(
     val companyName: String,
     val rate: Double,
     val previousRate: Double,
-    val productionType: String, // e.g., "Standard", "Premium"
-    val lastUpdated: String, // e.g., "2h ago", "15m ago"
-    val category: String // "BROILER", "EGGS", "CHICK"
+    val productionType: String,
+    val lastUpdated: String,
+    val category: String
 ) {
     val trend: PriceTrend
         get() = when {

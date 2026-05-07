@@ -29,12 +29,18 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Helper to get today's date in yyyy-MM-dd format to match Firestore doc IDs.
-     * This ensures Company Rates always reflect live data regardless of DateSelector.
+     * Today's date in yyyy-MM-dd format — matches Firestore doc IDs.
+     * Company Rates always use this — NOT DateSelector date.
      */
     private fun getTodayDateString(): String {
         val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
         return sdf.format(java.util.Date())
+    }
+
+    private fun groupRatesByCompany(
+        rates: List<CompanyRateUpdate>
+    ): Map<String, List<CompanyRateUpdate>> {
+        return rates.groupBy { it.companyName }
     }
 
     fun onEvent(event: HomeScreenEvent) {
@@ -56,23 +62,22 @@ class HomeViewModel @Inject constructor(
 
             val dummyCategories = listOf(
                 CategoryDomain("broiler", "Broiler", R.drawable.chicken),
-                CategoryDomain("chicken", "Chicken", R.drawable.boiled_chicken),
                 CategoryDomain("eggs", "Eggs", R.drawable.egg_tongue_face),
+                CategoryDomain("chickes", "Chickes", R.drawable.boiled_chicken),
             )
 
-            _uiState.update { 
+            _uiState.update {
                 it.copy(
                     dates = dates,
                     selectedDate = today,
                     categories = dummyCategories,
-                    selectedCategory = dummyCategories[2] // Default to Broiler
+                    selectedCategory = dummyCategories[0]
                 )
             }
 
-            today?.let { 
+            // ← Sirf fetchRatesForDate — empty company call HATAYA
+            today?.let {
                 fetchRatesForDate(it.isAvailable1)
-                // Pre-load company rates for today (default city or state handled in fetchRatesForDate snapshot)
-                fetchCompanyUpdates(getTodayDateString(), "")
             }
         }
     }
@@ -84,24 +89,36 @@ class HomeViewModel @Inject constructor(
 
         ratesJob = repository.getRatesForDate(dateString)
             .onEach { states ->
-                _uiState.update { currentState ->
-                    val newState = states.find { s -> s.name == currentState.selectedState?.name } ?: states.firstOrNull()
-                    
-                    // Auto-fetch company updates for the first city of the selected state using TODAY's date
-                    newState?.cities?.firstOrNull()?.let { firstCity ->
-                        fetchCompanyUpdates(getTodayDateString(), firstCity.city)
-                    }
+                val currentState = _uiState.value
+                val newSelectedState = states.find { s ->
+                    s.name == currentState.selectedState?.name
+                } ?: states.firstOrNull()
 
-                    currentState.copy(
+                val firstCity = newSelectedState?.cities?.firstOrNull()
+
+                // ← FIXED: Sirf tab fetch karo jab city actually change ho
+                if (firstCity?.city != currentState.selectedCityRate?.city) {
+                    firstCity?.let {
+                        fetchCompanyUpdates(getTodayDateString(), it.city)
+                    }
+                }
+
+                _uiState.update {
+                    it.copy(
                         isLoading = false,
                         states = states,
-                        selectedState = newState,
-                        selectedCityRate = newState?.cities?.firstOrNull()
+                        selectedState = newSelectedState,
+                        selectedCityRate = firstCity
                     )
                 }
             }
             .catch { e ->
-                _uiState.update { it.copy(isLoading = false, error = e.message ?: "Failed to fetch rates") }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = e.message ?: "Failed to fetch rates"
+                    )
+                }
             }
             .launchIn(viewModelScope)
     }
@@ -121,15 +138,16 @@ class HomeViewModel @Inject constructor(
 
     private fun onStateSelected(state: StateDomain) {
         val firstCity = state.cities.firstOrNull()
+
         _uiState.update {
             it.copy(
                 selectedState = state,
-                selectedCityRate = firstCity,
+                selectedCityRate = firstCity
             )
         }
-        
-        if (firstCity != null) {
 
+        // ← Only fetch if city is valid
+        if (firstCity != null) {
             fetchCompanyUpdates(getTodayDateString(), firstCity.city)
         }
     }
@@ -138,28 +156,39 @@ class HomeViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 selectedCityRate = marketRate,
-               /* showDynamicIsland = true*/
+                showDynamicIsland = true
             )
         }
-        // Fix: Always use TODAY's date for company rates
         fetchCompanyUpdates(getTodayDateString(), marketRate.city)
     }
 
     private fun fetchCompanyUpdates(dateString: String, cityId: String) {
-        if (dateString.isBlank()) return
-        
+        // ← Guard: blank city ya date ho toh bilkul call mat karo
+        if (dateString.isBlank() || cityId.isBlank()) {
+            Log.w("HomeViewModel", "Skipping company fetch — blank dateString or cityId")
+            return
+        }
+
+        Log.d("HomeViewModel", "Fetching company rates: date=$dateString city=$cityId")
+
         companyRatesJob?.cancel()
         companyRatesJob = repository.getCompanyRatesForCity(dateString, cityId)
             .onEach { updates ->
-                _uiState.update { it.copy(historicalRateData = updates) }
+                _uiState.update {
+                    it.copy(
+                        historicalRateData = updates,
+                        groupedCompanyRates = groupRatesByCompany(updates)
+                    )
+                }
             }
             .catch { e ->
-                Log.e("HomeViewModel", "Error in company rates: ${e.message}")
+                Log.e("HomeViewModel", "Company rates error: ${e.message}")
             }
             .launchIn(viewModelScope)
     }
 
     private fun closeDynamicIsland() {
+        companyRatesJob?.cancel()
         _uiState.update { it.copy(showDynamicIsland = false) }
     }
 }

@@ -1,19 +1,12 @@
 package com.example.poultrymandi.app.feature.home.presentation
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import com.example.poultrymandi.R
 import com.example.poultrymandi.app.Core.navigation.Screen
 import com.example.poultrymandi.app.feature.animation.DynamicIsland
-import com.example.poultrymandi.app.feature.home.domain.data.MarketRateDomain
 import com.example.poultrymandi.app.feature.home.presentation.Components.*
 import kotlin.math.abs
 
@@ -64,7 +56,7 @@ fun HomeScreen(
                     .padding(paddingValues),
                 contentPadding = PaddingValues(16.dp)
             ) {
-                // 1. HEADER
+
                 item {
                     HomeHeader(
                         selectedLanguage = state.selectedLanguage,
@@ -180,7 +172,7 @@ fun HomeScreen(
                     }
                 }
 
-                // 5. CITY SELECTOR ROW (NEW)
+
                 state.selectedState?.let { selectedState ->
                     item {
                         LazyRow(
@@ -207,168 +199,13 @@ fun HomeScreen(
                     }
                 }
 
-
-                item(key = "city_rate_card") {
-                    state.selectedCityRate?.let { cityRate ->
-                        val price = cityRate.getPriceForCategory(
-                            state.selectedCategory?.title ?: "Broiler"
-                        )
-                        val diff = cityRate.getPriceChangeForCategory(
-                            state.selectedCategory?.title ?: "Broiler"
-                        )
-                        val isUp = diff > 0
-                        val isDown = diff < 0
-                        val trendColor = when {
-                            isUp -> Color(0xFF1D9E75)
-                            isDown -> Color(0xFFE24B4A)
-                            else -> Color.Gray
-                        }
-                        val arrow = when {
-                            isUp -> "▲"
-                            isDown -> "▼"
-                            else -> "—"
-                        }
-                        val todayDate = remember {
-                            java.text.SimpleDateFormat(
-                                "dd/MM/yyyy", 
-                                java.util.Locale.getDefault()
-                            ).format(java.util.Date())
-                        }
-                        val currentTime = remember(cityRate) {
-                            java.text.SimpleDateFormat(
-                                "hh:mm a", 
-                                java.util.Locale.getDefault()
-                            ).format(java.util.Date())
-                        }
-
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp)
-                                .clickable { onEvent(HomeScreenEvent.CityClicked(cityRate)) },
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                            ) {
-                                // ── Row 1: City Name + Date ──
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.LocationOn,
-                                            contentDescription = null,
-                                            tint = Color(0xFF4CAF50),
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text(
-                                            text = cityRate.city,
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.Black
-                                        )
-                                    }
-                                    Text(
-                                        text = todayDate,
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = Color.Gray
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.height(12.dp))
-                                HorizontalDivider(color = Color.LightGray.copy(alpha = 0.4f))
-                                Spacer(modifier = Modifier.height(12.dp))
-
-                                // ── Row 2: Price + Trend ──
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "₹${"%.2f".format(price)}",
-                                        fontSize = 32.sp,
-                                        fontWeight = FontWeight.Black,
-                                        color = trendColor
-                                    )
-                                    Column(horizontalAlignment = Alignment.End) {
-                                        Text(
-                                            text = "$arrow ₹${"%.2f".format(abs(diff))}",
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = trendColor
-                                        )
-                                        Text(
-                                            text = "today",
-                                            fontSize = 12.sp,
-                                            color = Color.Gray
-                                        )
-                                    }
-                                }
-
-                                Spacer(modifier = Modifier.height(12.dp))
-                                HorizontalDivider(color = Color.LightGray.copy(alpha = 0.4f))
-                                Spacer(modifier = Modifier.height(8.dp))
-
-
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Surface(
-                                        color = Color(0xFF4CAF50).copy(alpha = 0.1f),
-                                        shape = RoundedCornerShape(20.dp)
-                                    ) {
-                                        Text(
-                                            text = state.selectedCategory?.title ?: "Broiler",
-                                            modifier = Modifier.padding(
-                                                horizontal = 12.dp, 
-                                                vertical = 4.dp
-                                            ),
-                                            fontSize = 13.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = Color(0xFF4CAF50)
-                                        )
-                                    }
-                                    Text(
-                                        text = "Last Updated: $currentTime",
-                                        fontSize = 12.sp,
-                                        color = Color.Gray
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // 7. COMPANY RATES SECTION
-                item {
-                    Text(
-                        text = "Company Rates — ${state.selectedCityRate?.city ?: ""}",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color.Black,
-                        modifier = Modifier.padding(bottom = 12.dp)
+                // ── REDESIGNED COMPANY RATES FOCUS ───────────────
+                item(key = "company_rates") {
+                    FarmerCompanyRateTable(
+                        groupedRates = state.groupedCompanyRates,
+                        cityName = state.selectedCityRate?.city
+                            ?: state.selectedState?.cities?.firstOrNull()?.city ?: ""
                     )
-                    
-                    if (state.historicalRateData.isNotEmpty()) {
-                        CompanyRateTable(rates = state.historicalRateData)
-                    } else {
-                        Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                            Text("Loading company rates...", color = Color.Gray, fontSize = 14.sp)
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(80.dp)) 
                 }
             }
 

@@ -14,6 +14,7 @@ data class HomeState(
     val states: List<StateDomain> = emptyList(),
     val selectedState: StateDomain? = null,
     val historicalRateData: List<CompanyRateUpdate> = emptyList(),
+    val groupedCompanyRates: Map<String, List<CompanyRateUpdate>> = emptyMap(),
     val expandedCityId: String? = null,
     val showDynamicIsland: Boolean = false,
     val selectedCityRate: MarketRateDomain? = null,
