@@ -18,6 +18,7 @@ import com.example.poultrymandi.app.feature.profile.presentation.ProfileScreenRo
 fun BottomNavGraph(
     navController: NavHostController,
     paddingValues: PaddingValues,
+    onLogout: () -> Unit = {},
     onBottomBarVisibilityChanged: (Boolean) -> Unit = {}
 ) {
     NavHost(
@@ -26,35 +27,25 @@ fun BottomNavGraph(
         modifier = Modifier.padding(paddingValues)
     ) {
         composable<Screen.Home> {
-
             HomeRoute(
-
                 currentRoute = Screen.Home,
                 onNavigateToNotifications = {
                     navController.navigate(Screen.Notifications)
                 },
-
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile)
                 },
                 onNavigateToPaperRate = {
                     navController.navigate(Screen.PaperRate)
                 },
-
                 onBottomBarVisibilityChanged = onBottomBarVisibilityChanged
             )
-
-
-
-
-
         }
         composable<Screen.Notifications> {
             NotficationRoute(
                 currentRoute = Screen.Notifications,
                 onBackClick = {
                     navController.popBackStack()
-
                 },
                 onNavigateToHome = {
                     navController.navigate(Screen.Home)
@@ -65,8 +56,6 @@ fun BottomNavGraph(
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile)
                 }
-
-
             )
         }
         composable<Screen.Profile> {
@@ -82,13 +71,10 @@ fun BottomNavGraph(
                     navController.navigate(Screen.PaperRate)
                 },
                 onNavigateToProfile = {
-
-                }
-
+                    navController.navigate(Screen.Profile)
+                },
+                onNavigateToLogin = onLogout
             )
-
-
-
         }
         composable<Screen.PaperRate>  {
             PaperRateRoute(
@@ -105,10 +91,7 @@ fun BottomNavGraph(
                 onNavigateToNotifications = {
                     navController.navigate(Screen.Notifications)
                 }
-
-
             )
-
         }
     }
 }

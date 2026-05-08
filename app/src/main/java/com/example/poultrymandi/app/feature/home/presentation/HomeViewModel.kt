@@ -38,9 +38,32 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun groupRatesByCompany(
-        rates: List<CompanyRateUpdate>
+        rates: List<CompanyRateUpdate>,
+        selectedCategory: String?
     ): Map<String, List<CompanyRateUpdate>> {
-        return rates.groupBy { it.companyName }
+        Log.d("CategoryDebug", "Filtering by category: $selectedCategory")
+
+        val filtered = if (selectedCategory.isNullOrBlank()) {
+            rates
+        } else {
+            rates.filter { rate ->
+                val variety = rate.variety.trim().lowercase()
+                val category = rate.category.trim().lowercase()
+                val selected = selectedCategory.trim().lowercase()
+
+                variety == selected ||
+                category == selected ||
+                variety.contains(selected) ||
+                category.contains(selected) ||
+                rate.companyName.lowercase().contains(selected)
+            }
+        }
+
+        Log.d("CategoryDebug", 
+            "Total: ${rates.size} | After filter: ${filtered.size}"
+        )
+
+        return filtered.groupBy { it.companyName }
     }
 
     fun onEvent(event: HomeScreenEvent) {
@@ -63,7 +86,7 @@ class HomeViewModel @Inject constructor(
             val dummyCategories = listOf(
                 CategoryDomain("broiler", "Broiler", R.drawable.chicken),
                 CategoryDomain("eggs", "Eggs", R.drawable.egg_tongue_face),
-                CategoryDomain("chickes", "Chickes", R.drawable.boiled_chicken),
+                CategoryDomain("chickes", "Chicken", R.drawable.boiled_chicken),
             )
 
             _uiState.update {
@@ -129,7 +152,18 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onCategorySelected(category: CategoryDomain) {
-        _uiState.update { it.copy(selectedCategory = category) }
+        Log.d("CategoryDebug", "Category selected: ${category.title}")
+        val currentRates = _uiState.value.historicalRateData
+
+        _uiState.update {
+            it.copy(
+                selectedCategory = category,
+                groupedCompanyRates = groupRatesByCompany(
+                    currentRates,
+                    category.title
+                )
+            )
+        }
     }
 
     private fun onLanguageSelected(language: String) {
@@ -174,10 +208,19 @@ class HomeViewModel @Inject constructor(
         companyRatesJob?.cancel()
         companyRatesJob = repository.getCompanyRatesForCity(dateString, cityId)
             .onEach { updates ->
+                // DEBUG — see what variety field actually contains
+                updates.forEach { 
+                    Log.d("CategoryDebug", 
+                        "company=${it.companyName} | variety=${it.variety} | category=${it.category} | rate=${it.rate}"
+                    )
+                }
                 _uiState.update {
                     it.copy(
                         historicalRateData = updates,
-                        groupedCompanyRates = groupRatesByCompany(updates)
+                        groupedCompanyRates = groupRatesByCompany(
+                            updates,
+                            it.selectedCategory?.title
+                        )
                     )
                 }
             }

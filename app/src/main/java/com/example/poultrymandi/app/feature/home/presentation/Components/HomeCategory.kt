@@ -1,6 +1,5 @@
 package com.example.poultrymandi.app.feature.home.presentation.Components
 
-import android.R.attr.category
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -28,12 +27,9 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.poultrymandi.R
 import com.example.poultrymandi.app.Core.ui.theme.brown
-import com.example.poultrymandi.app.feature.home.data.Enums.Category
 import com.example.poultrymandi.app.feature.home.domain.data.CategoryDomain
 
 
@@ -54,11 +50,11 @@ fun HomeCategory(
         horizontalArrangement = Arrangement.SpaceEvenly
 
     ) {
-        categories.forEach { categories ->
+        categories.forEach { categoryItem ->
             CategoryChip(
-                category = categories,
-                isSelected = categories.id== selectedCategory?.id,
-                onClick = { onCategorySelected(categories) }
+                category = categoryItem,
+                isSelected = categoryItem.id == selectedCategory?.id,
+                onClick = { onCategorySelected(categoryItem) }
             )
         }
 
@@ -124,4 +120,3 @@ fun CategoryChip(
         )
     }
 }
-

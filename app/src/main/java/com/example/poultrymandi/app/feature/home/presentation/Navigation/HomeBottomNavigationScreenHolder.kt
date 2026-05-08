@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.poultrymandi.app.Core.navigation.BottomNavScreen
@@ -12,9 +11,10 @@ import com.example.poultrymandi.app.Core.navigation.Screen
 import com.example.poultrymandi.app.Core.ui.components.PoultryBottomBar
 
 
-@Preview(showBackground = true)
 @Composable
-fun HomeBottomNavigationScreenHolder() {
+fun HomeBottomNavigationScreenHolder(
+    onLogout: () -> Unit = {}
+) {
 
     val navController = rememberNavController()
 
@@ -71,6 +71,7 @@ fun HomeBottomNavigationScreenHolder() {
         BottomNavGraph(
             navController = navController,
             paddingValues = paddingValues,
+            onLogout = onLogout,
             onBottomBarVisibilityChanged = { visible ->
                 isBottomBarVisible = visible
             }

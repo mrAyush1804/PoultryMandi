@@ -94,7 +94,13 @@ fun AppNavigation(navController: NavHostController) {
         }
 
         composable<Screen.HomeBottomNavigationScreenHolder> {
-            HomeBottomNavigationScreenHolder()
+            HomeBottomNavigationScreenHolder(
+                onLogout = {
+                    navController.navigate(Screen.Login) {
+                        popUpTo(Screen.HomeBottomNavigationScreenHolder) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

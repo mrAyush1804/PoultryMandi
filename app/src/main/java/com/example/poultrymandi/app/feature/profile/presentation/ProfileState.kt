@@ -8,7 +8,8 @@ data class ProfileState(
     val selectedLanguage: String = "English",
     val isLoading: Boolean = false,
     val error: String? = null,
-    val seedSuccess: Boolean=false
+    val seedSuccess: Boolean=false,
+    val showLogoutDialog: Boolean = false
 )
 
 sealed class Propilescreenevent() {

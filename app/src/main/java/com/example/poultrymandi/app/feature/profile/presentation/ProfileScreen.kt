@@ -11,7 +11,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,20 +26,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.poultrymandi.R
 import com.example.poultrymandi.app.Core.ui.components.AppToggle
 import com.example.poultrymandi.app.Core.ui.theme.BlackC
-import com.example.poultrymandi.app.Core.ui.theme.brown
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,7 +47,64 @@ fun ProfileScreen(
     val uiState by viewModel.uiState.collectAsState()
     val bgColor = Color(0xFFF8F9FA)
 
+
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let {
+            snackbarHostState.showSnackbar(it)
+        }
+    }
+
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            shape = RoundedCornerShape(16.dp),
+            title = {
+                Text(
+                    text = "Logout",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = BlackC
+                )
+            },
+            text = {
+                Text(
+                    text = "Kya aap logout karna chahte hain?",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showLogoutDialog = false
+                        viewModel.logout() // ✅ ViewModel ka logout call
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFEF5350)
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Haan, Logout", color = Color.White)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { showLogoutDialog = false },
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Cancel", color = BlackC)
+                }
+            }
+        )
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }, // ✅ Error snackbar
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -101,7 +153,6 @@ fun ProfileScreen(
                         fontWeight = FontWeight.Bold,
                         color = BlackC,
                         modifier = Modifier.padding(bottom = 12.dp)
-
                     )
                     AppToggle(
                         option = uiState.languages,
@@ -113,44 +164,68 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // Menu Options with Animation
+            // Menu Options
             val menuItems = listOf(
-                ProfileMenuOption("Farm Details", "Manage sheds, flock count, and equipment", R.drawable.details,
-                    onClick = {
-                        openCustomTab(context , url = "https://poultrymandi_info.pagelet.host/privacy")
-                    }),
-                ProfileMenuOption("Market Preferences", "Favorite buyers, preferred trading zones",R.drawable.home),
-                ProfileMenuOption("About ", "Price alerts, order status updates", R.drawable.notification),
-                ProfileMenuOption("Help & Support", "Contact us, FAQs, User guide", R.drawable.outline_support_agent_24,
-                    onClick = {
-                        openCustomTab(context , url = "https://poultrymandi_info.pagelet.host/privacy")
-                    }),
-                ProfileMenuOption("About Us", "Know more about PoultryMandi", R.drawable.about_us,
-                    onClick = {
-                        openCustomTab(context , url = "https://poultrymandi_info.pagelet.host/privacy")
-                    }),
-                ProfileMenuOption("Privacy Policy", "Read our Privacy Policy", R.drawable.privatsy,
-                    onClick = {
-                        openCustomTab(context , url = "https://poultrymandi_info.pagelet.host/privacy")
-                    }),
-                ProfileMenuOption("Terms & Conditions", "Read our terms and conditions", R.drawable.privatsy,
-                    onClick = {
-                        openCustomTab(context, url = "https://poultrymandi_info.pagelet.host/privacy")
-                    }),
-                ProfileMenuOption("Setting", "Read our Setting", R.drawable.outline_settings_heart_24),
-                ProfileMenuOption("How to Use PoultryMandi", "Read our How to Use PoultryMandi", R.drawable.howtouse)
-
-
+                ProfileMenuOption(
+                    "Farm Details",
+                    "Manage sheds, flock count, and equipment",
+                    R.drawable.details,
+                    onClick = { openCustomTab(context, url = "https://poultrymandi_info.pagelet.host/privacy") }
+                ),
+                ProfileMenuOption(
+                    "Market Preferences",
+                    "Favorite buyers, preferred trading zones",
+                    R.drawable.home
+                ),
+                ProfileMenuOption(
+                    "About",
+                    "Price alerts, order status updates",
+                    R.drawable.notification
+                ),
+                ProfileMenuOption(
+                    "Help & Support",
+                    "Contact us, FAQs, User guide",
+                    R.drawable.outline_support_agent_24,
+                    onClick = { openCustomTab(context, url = "https://poultrymandi_info.pagelet.host/privacy") }
+                ),
+                ProfileMenuOption(
+                    "About Us",
+                    "Know more about PoultryMandi",
+                    R.drawable.about_us,
+                    onClick = { openCustomTab(context, url = "https://poultrymandi_info.pagelet.host/privacy") }
+                ),
+                ProfileMenuOption(
+                    "Privacy Policy",
+                    "Read our Privacy Policy",
+                    R.drawable.privatsy,
+                    onClick = { openCustomTab(context, url = "https://poultrymandi_info.pagelet.host/privacy") }
+                ),
+                ProfileMenuOption(
+                    "Terms & Conditions",
+                    "Read our terms and conditions",
+                    R.drawable.privatsy,
+                    onClick = { openCustomTab(context, url = "https://poultrymandi_info.pagelet.host/privacy") }
+                ),
+                ProfileMenuOption(
+                    "Setting",
+                    "App settings",
+                    R.drawable.outline_settings_heart_24
+                ),
+                ProfileMenuOption(
+                    "How to Use PoultryMandi",
+                    "Read our How to Use PoultryMandi",
+                    R.drawable.howtouse
+                )
             )
 
             itemsIndexed(menuItems) { index, item ->
                 AnimatedProfileOption(item, index)
             }
 
-            // Logout Button
+            // ✅ Logout Button — dialog open karega
             item {
                 Spacer(modifier = Modifier.height(32.dp))
-                LogoutButton(onClick = { viewModel.logout() })
+                LogoutButton(onClick = { showLogoutDialog = true })
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
@@ -162,7 +237,7 @@ fun ProfileHeader(profile: com.example.poultrymandi.app.feature.profile.domain.m
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(contentAlignment = Alignment.BottomEnd) {
             Image(
-                painter = painterResource(id = R.drawable.chicks), // Replace with actual profile image logic
+                painter = painterResource(id = R.drawable.chicks),
                 contentDescription = "Profile Image",
                 modifier = Modifier
                     .size(120.dp)
@@ -174,7 +249,7 @@ fun ProfileHeader(profile: com.example.poultrymandi.app.feature.profile.domain.m
                 modifier = Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .clickable { /* Edit image */ },
+                    .clickable { },
                 color = Color(0xFF2ECC71),
                 border = BorderStroke(2.dp, Color.White)
             ) {
@@ -186,7 +261,6 @@ fun ProfileHeader(profile: com.example.poultrymandi.app.feature.profile.domain.m
                 )
             }
         }
-
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = profile?.name ?: "User Name",
@@ -223,11 +297,8 @@ fun ProfileHeader(profile: com.example.poultrymandi.app.feature.profile.domain.m
 @Composable
 fun AnimatedProfileOption(item: ProfileMenuOption, index: Int) {
     val visibleState = remember {
-        MutableTransitionState(false).apply {
-            targetState = true
-        }
+        MutableTransitionState(false).apply { targetState = true }
     }
-
     AnimatedVisibility(
         visibleState = visibleState,
         enter = fadeIn(
@@ -250,7 +321,7 @@ fun ProfileOptionCard(item: ProfileMenuOption) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable {  item.onClick() },
+            .clickable { item.onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -286,8 +357,6 @@ fun ProfileOptionCard(item: ProfileMenuOption) {
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
-
-
             }
             Icon(
                 Icons.Default.Build,
@@ -297,6 +366,7 @@ fun ProfileOptionCard(item: ProfileMenuOption) {
         }
     }
 }
+
 
 @Composable
 fun LogoutButton(onClick: () -> Unit) {
@@ -313,7 +383,7 @@ fun LogoutButton(onClick: () -> Unit) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                Icons.Default.Delete,
+                Icons.Default.ExitToApp, // ✅ Delete icon hata ke ExitToApp lagaya
                 contentDescription = null,
                 tint = Color(0xFFEF5350)
             )
@@ -332,9 +402,8 @@ data class ProfileMenuOption(
     val title: String,
     val subtitle: String,
     val icon: Int,
-    val  onClick : () -> Unit={}
+    val onClick: () -> Unit = {}
 )
-
 
 fun openCustomTab(context: Context, url: String) {
     val intent = CustomTabsIntent.Builder()
@@ -342,9 +411,3 @@ fun openCustomTab(context: Context, url: String) {
         .build()
     intent.launchUrl(context, Uri.parse(url))
 }
-
-/*@Preview(showBackground = true)
-@Composable
-fun ProfileScreenPreview() {
-    ProfileScreen()
-}*/
