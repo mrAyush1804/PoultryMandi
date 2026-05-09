@@ -16,7 +16,6 @@ import com.example.poultrymandi.app.feature.auth.presentation.login.LoginRoute
 import com.example.poultrymandi.app.feature.auth.presentation.singup.SignUpRoute
 import com.example.poultrymandi.app.feature.home.presentation.Navigation.HomeBottomNavigationScreenHolder
 
-
 @Composable
 fun AppNavigation(navController: NavHostController) {
     NavHost(
@@ -30,9 +29,7 @@ fun AppNavigation(navController: NavHostController) {
 
             LaunchedEffect(destination) {
                 when (destination) {
-                    SplashDestination.Loading -> {
-                        // Wait karo — kuch mat karo
-                    }
+                    SplashDestination.Loading -> { /* Stay on Splash while checking auth */ }
                     SplashDestination.Login -> {
                         navController.navigate(Screen.Login) {
                             popUpTo(Screen.Splash) { inclusive = true }
@@ -60,6 +57,7 @@ fun AppNavigation(navController: NavHostController) {
                     navController.navigate(Screen.SignUp)
                 },
                 onLoginSuccess = { userId ->
+                    // After login success, pop Login so back button doesn't return to it
                     navController.navigate(Screen.HomeBottomNavigationScreenHolder) {
                         popUpTo(Screen.Login) { inclusive = true }
                     }
@@ -73,21 +71,21 @@ fun AppNavigation(navController: NavHostController) {
                     navController.navigate(Screen.Login)
                 },
                 onSignUpSuccess = { userId ->
-                    // Navigate to Complete Profile after successful signup
+                    // Navigate to Complete Profile after successful signup, removing signup from stack
                     navController.navigate(Screen.CompleteProfile) {
                         popUpTo(Screen.SignUp) { inclusive = true }
                     }
                 },
-                webClientId = "104151826609" +
-                        "5-j52d0ldnvvholhq0tm5ce0fb5ds73l3u.apps.googleusercontent.com"
+                webClientId = "1041518266095-j52d0ldnvvholhq0tm5ce0fb5ds73l3u.apps.googleusercontent.com"
             )
         }
 
         composable<Screen.CompleteProfile> {
             CompleteProfileRoute(
                 onProfileCompleted = {
+                    // After profile completion, clear entire backstack before going Home
                     navController.navigate(Screen.HomeBottomNavigationScreenHolder) {
-                        popUpTo(Screen.SignUp) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
@@ -96,6 +94,7 @@ fun AppNavigation(navController: NavHostController) {
         composable<Screen.HomeBottomNavigationScreenHolder> {
             HomeBottomNavigationScreenHolder(
                 onLogout = {
+                    // After logout, pop Home stack and go back to Login
                     navController.navigate(Screen.Login) {
                         popUpTo(Screen.HomeBottomNavigationScreenHolder) { inclusive = true }
                     }

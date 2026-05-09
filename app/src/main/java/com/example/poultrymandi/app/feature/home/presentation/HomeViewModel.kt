@@ -86,7 +86,7 @@ class HomeViewModel @Inject constructor(
             val dummyCategories = listOf(
                 CategoryDomain("broiler", "Broiler", R.drawable.chicken),
                 CategoryDomain("eggs", "Eggs", R.drawable.egg_tongue_face),
-                CategoryDomain("chickes", "Chicken", R.drawable.boiled_chicken),
+                CategoryDomain("chickes", "chickes", R.drawable.boiled_chicken),
             )
 
             _uiState.update {
@@ -190,7 +190,7 @@ class HomeViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 selectedCityRate = marketRate,
-                showDynamicIsland = true
+
             )
         }
         fetchCompanyUpdates(getTodayDateString(), marketRate.city)

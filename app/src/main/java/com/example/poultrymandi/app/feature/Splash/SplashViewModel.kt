@@ -21,47 +21,72 @@ class SplashViewModel @Inject constructor(
     private val _destination = MutableStateFlow<SplashDestination>(SplashDestination.Loading)
     val destination: StateFlow<SplashDestination> = _destination.asStateFlow()
 
+    private var authListener: FirebaseAuth.AuthStateListener? = null
+
     init {
         checkAuthState()
     }
 
     private fun checkAuthState() {
-        viewModelScope.launch {
-            val user = auth.currentUser
+        // Production-grade Auth flow: Use AuthStateListener to ensure Firebase session is restored from cache.
+        // Reading currentUser directly on cold start can return null prematurely before the session is restored.
+        authListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            // Remove listener immediately after the first callback to prevent duplicate processing.
+            // We only need the initial state to decide where to navigate.
+            removeListener()
 
-            // Not logged in → go to Login
+            val user = firebaseAuth.currentUser
             if (user == null) {
                 _destination.value = SplashDestination.Login
-                return@launch
+                return@AuthStateListener
             }
 
-            try {
-                // Check if user already has profile in Firestore
-                val doc = firestore
-                    .collection("users")
-                    .document(user.uid)
-                    .get()
-                    .await()
+            viewModelScope.launch {
+                try {
+                    // Check profile completion status in Firestore
+                    val doc = firestore
+                        .collection("users")
+                        .document(user.uid)
+                        .get()
+                        .await()
 
-                val phone = doc.getString("phone") ?: ""
-                val name = doc.getString("name") ?: ""
+                    if (doc.exists()) {
+                        val phone = doc.getString("phone") ?: ""
+                        val name = doc.getString("name") ?: ""
 
-                if (phone.isBlank() || name.isBlank()) {
-                    // Profile incomplete → go to CompleteProfile
-                    _destination.value = SplashDestination.CompleteProfile
-                } else {
-                    // Profile complete → go directly to Home
-                    _destination.value = SplashDestination.Home
+                        _destination.value = if (phone.isBlank() || name.isBlank()) {
+                            SplashDestination.CompleteProfile
+                        } else {
+                            SplashDestination.Home
+                        }
+                    } else {
+                        // User exists in Auth but no Firestore record yet
+                        _destination.value = SplashDestination.CompleteProfile
+                    }
+                } catch (e: Exception) {
+                    // Fallback to Login if data fetch fails or user is deleted
+                    _destination.value = SplashDestination.Login
                 }
-            } catch (e: Exception) {
-                // Firestore error or network issue → go to Login to be safe
-                _destination.value = SplashDestination.Login
             }
         }
+        
+        auth.addAuthStateListener(authListener!!)
+    }
+
+    private fun removeListener() {
+        authListener?.let {
+            auth.removeAuthStateListener(it)
+            authListener = null
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        // Clean up listener to prevent memory leaks
+        removeListener()
     }
 }
 
-// Possible splash destinations
 sealed class SplashDestination {
     object Loading : SplashDestination()
     object Login : SplashDestination()

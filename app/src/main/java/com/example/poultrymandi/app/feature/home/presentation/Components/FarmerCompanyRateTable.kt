@@ -33,16 +33,31 @@ fun FarmerCompanyRateTable(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 8.dp)
     ) {
-        // ── Section Heading ──
-        Text(
-            text = "Company Rates — $cityName",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Black,
-            color = Color.Black,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
+      Row(
+          modifier = modifier
+              .fillMaxWidth()
+              .padding(vertical = 8.dp)
+      ) {
+
+          Text(
+              text = "Company Rates :",
+              fontSize = 20.sp,
+              fontWeight = FontWeight.Black,
+              color = Color.Black,
+
+          )
+
+          Text(
+              text = ": $cityName",
+              fontSize = 20.sp,
+              fontWeight = FontWeight.Black,
+              color = Color.Red,
+              modifier = Modifier.padding(horizontal = 10.dp)
+          )
+      }
+
 
         if (groupedRates.isEmpty()) {
             Box(
