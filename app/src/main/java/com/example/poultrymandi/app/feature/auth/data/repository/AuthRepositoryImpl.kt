@@ -9,6 +9,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.actionCodeSettings
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -20,18 +21,18 @@ class AuthRepositoryImpl @Inject constructor(
 
     companion object {
         private const val TAG = "AuthRepositoryImpl"
-        private const val USERS = "users"  // ← YEH ADD KARO
+        private const val USERS = "users"
 
     }
     override suspend fun sendEmailVerificationLink(email: String): Result<Unit> {
         return try {
             val actionCodeSettings = actionCodeSettings {
-                url = "https://poultrymandi.firebaseapp.com/finishSignUp"  // apna URL daalo
+                url = "https://poultrymandi.firebaseapp.com/finishSignUp"
                 handleCodeInApp = true
                 setAndroidPackageName(
                     "com.example.poultrymandi",
-                    true,   // install if not available
-                    "21"    // minimum version
+                    true,
+                    "21"
                 )
             }
             auth.sendSignInLinkToEmail(email, actionCodeSettings).await()
@@ -60,7 +61,7 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override fun isEmailSignInLink(link: String): Boolean {
-        return Firebase.auth.isSignInWithEmailLink(link)
+        return auth.isSignInWithEmailLink(link)
     }
 
     override fun saveEmailLocally(email: String) {
@@ -91,10 +92,10 @@ class AuthRepositoryImpl @Inject constructor(
                         "name"       to (user?.displayName ?: ""),
                         "email"      to (user?.email ?: ""),
                         "photoUrl"   to (user?.photoUrl?.toString() ?: ""),
-                        "phone"      to "",           // abhi empty
-                        "occupation" to "",           // abhi empty
-                        "income"     to "",           // abhi empty
-                        "address"    to "",           // abhi empty
+                        "phone"      to "",
+                        "occupation" to "",
+                        "income"     to "",
+                        "address"    to "",
                         "subscription" to "free",
                         "createdAt"  to System.currentTimeMillis()
                     )).await()
@@ -121,16 +122,17 @@ class AuthRepositoryImpl @Inject constructor(
         return try {
             Log.d(TAG, "saveCompleteProfile → START uid: $uid")
 
+            // Changed .update() to .set() with merge to ensure document is created if it doesn't exist
             firestore.collection(USERS)
                 .document(uid)
-                .update(mapOf(
+                .set(mapOf(
                     "name"       to name,
                     "phone"      to phone,
                     "occupation" to occupation,
                     "income"     to income,
                     "address"    to address,
                     "profileCompletedAt" to System.currentTimeMillis()
-                )).await()
+                ), SetOptions.merge()).await()
 
             Log.d(TAG, " Profile saved to Firestore")
             Result.success(Unit)

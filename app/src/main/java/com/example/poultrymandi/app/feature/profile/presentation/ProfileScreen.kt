@@ -269,7 +269,7 @@ fun ProfileHeader(profile: com.example.poultrymandi.app.feature.profile.domain.m
             color = BlackC
         )
         Text(
-            text = profile?.role ?: "Role",
+            text = profile?.occupation ?: "Role",
             fontSize = 14.sp,
             color = Color(0xFF2ECC71),
             fontWeight = FontWeight.SemiBold
@@ -286,7 +286,7 @@ fun ProfileHeader(profile: com.example.poultrymandi.app.feature.profile.domain.m
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = profile?.location ?: "Location",
+                text = profile?.address ?: "Location",
                 fontSize = 12.sp,
                 color = Color.Gray
             )

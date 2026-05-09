@@ -23,20 +23,14 @@ import com.example.poultrymandi.app.Core.ui.components.AppEditText
 import com.example.poultrymandi.app.Core.ui.components.CustomInputType
 import com.example.poultrymandi.app.Core.ui.components.CustomTextFieldState
 import com.example.poultrymandi.app.Core.ui.theme.brown
-
 @Composable
 fun CompleteProfileScreen(
-    viewModel: CompleteProfileViewModel = hiltViewModel(),
-    onProfileCompleted: () -> Unit = {}
+    uiState: CompleteProfileState,
+    onEvent: (CompleteProfileEvent) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val scrollState = rememberScrollState()
 
-    LaunchedEffect(uiState.submissionSuccess) {
-        if (uiState.submissionSuccess) {
-            onProfileCompleted()
-        }
-    }
+
+    val scrollState = rememberScrollState()
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -50,7 +44,7 @@ fun CompleteProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(20.dp))
-            
+
             Image(
                 painter = painterResource(id = R.drawable.chicks),
                 contentDescription = "App Logo",
@@ -75,10 +69,9 @@ fun CompleteProfileScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // 1. Full Name
             AppEditText(
                 value = uiState.name,
-                onValueChange = { viewModel.onEvent(CompleteProfileEvent.NameChanged(it)) },
+                onValueChange = { onEvent(CompleteProfileEvent.NameChanged(it)) }, // ✅ viewModel.onEvent → onEvent
                 label = "Full Name",
                 placeholder = "Enter your full name",
                 errorMessage = uiState.nameError,
@@ -90,10 +83,9 @@ fun CompleteProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 2. Phone Number
             AppEditText(
                 value = uiState.phoneNumber,
-                onValueChange = { viewModel.onEvent(CompleteProfileEvent.PhoneNumberChanged(it)) },
+                onValueChange = { onEvent(CompleteProfileEvent.PhoneNumberChanged(it)) }, // ✅
                 label = "Phone Number",
                 placeholder = "10 digit mobile number",
                 errorMessage = uiState.phoneNumberError,
@@ -105,10 +97,9 @@ fun CompleteProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 3. Occupation
             AppEditText(
                 value = uiState.occupation,
-                onValueChange = { viewModel.onEvent(CompleteProfileEvent.OccupationChanged(it)) },
+                onValueChange = { onEvent(CompleteProfileEvent.OccupationChanged(it)) }, // ✅
                 label = "Occupation",
                 placeholder = "e.g. Farmer, Trader, Feed Supplier",
                 errorMessage = uiState.occupationError,
@@ -120,10 +111,9 @@ fun CompleteProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 4. Annual Income
             AppEditText(
                 value = uiState.income,
-                onValueChange = { viewModel.onEvent(CompleteProfileEvent.IncomeChanged(it)) },
+                onValueChange = { onEvent(CompleteProfileEvent.IncomeChanged(it)) }, // ✅
                 label = "Annual Income (₹)",
                 placeholder = "Approx annual income",
                 errorMessage = uiState.incomeError,
@@ -135,10 +125,9 @@ fun CompleteProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 5. Address (Optional)
             AppEditText(
                 value = uiState.address,
-                onValueChange = { viewModel.onEvent(CompleteProfileEvent.AddressChanged(it)) },
+                onValueChange = { onEvent(CompleteProfileEvent.AddressChanged(it)) }, // ✅
                 label = "Full Address (Optional)",
                 placeholder = "Village, Tehsil, District, State",
                 inputType = CustomInputType.Text,
@@ -150,12 +139,12 @@ fun CompleteProfileScreen(
 
             AppButton(
                 text = "Save and Continue",
-                onClick = { viewModel.onEvent(CompleteProfileEvent.SubmitClicked) },
+                onClick = { onEvent(CompleteProfileEvent.SubmitClicked) }, // ✅
                 enabled = uiState.isFormValid && !uiState.isLoading,
                 isLoading = uiState.isLoading,
                 modifier = Modifier.fillMaxWidth()
             )
-            
+
             Spacer(modifier = Modifier.height(20.dp))
         }
     }

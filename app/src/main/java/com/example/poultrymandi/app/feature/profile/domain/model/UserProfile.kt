@@ -1,9 +1,11 @@
 package com.example.poultrymandi.app.feature.profile.domain.model
 
 data class UserProfile(
-    val name: String,
-    val role: String,
-    val location: String,
+    val name: String = "",
+    val phone: String = "",
+    val occupation: String = "",
+    val income: String = "",
+    val address: String = "",
     val profileImageUrl: String? = null,
-    val farmerSince: String
+    val farmerSince: String = ""
 )

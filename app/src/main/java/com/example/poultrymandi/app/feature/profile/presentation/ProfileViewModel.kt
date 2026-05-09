@@ -33,8 +33,8 @@ class ProfileViewModel @Inject constructor(
 
         val mockProfile = UserProfile(
             name = "Rajesh Kumar",
-            role = "Poultry Farmer since 2018",
-            location = "Pune, Maharashtra",
+            occupation = "Poultry Farmer since 2018",
+            address = "Pune, Maharashtra",
             farmerSince = "2018"
         )
         _uiState.update { it.copy(userProfile = mockProfile) }

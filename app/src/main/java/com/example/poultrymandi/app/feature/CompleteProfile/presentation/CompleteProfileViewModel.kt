@@ -21,6 +21,7 @@ class CompleteProfileViewModel @Inject constructor(
 
     ) : ViewModel() {
 
+
     companion object { private const val TAG = "CompleteProfileVM" }
 
 

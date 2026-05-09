@@ -1,12 +1,26 @@
 package com.example.poultrymandi.app.feature.CompleteProfile.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun CompleteProfileRoute(
-    onProfileCompleted: () -> Unit
+    onProfileCompleted: () -> Unit,
+    viewModel: CompleteProfileViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(uiState.submissionSuccess) {
+        if (uiState.submissionSuccess) {
+            onProfileCompleted()
+        }
+    }
+
     CompleteProfileScreen(
-        onProfileCompleted = onProfileCompleted
+        uiState = uiState,
+        onEvent = viewModel::onEvent
     )
 }
