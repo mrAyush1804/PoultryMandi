@@ -20,8 +20,8 @@ fun HomeBottomNavigationScreenHolder(
 
     val bottomScreens = listOf(
         BottomNavScreen.Home,
-        BottomNavScreen.Notifications,
         BottomNavScreen.PaperRate,
+        BottomNavScreen.Notifications,
         BottomNavScreen.Profile
     )
 

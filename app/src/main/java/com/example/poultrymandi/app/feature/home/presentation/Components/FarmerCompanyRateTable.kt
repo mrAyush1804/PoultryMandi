@@ -33,7 +33,7 @@ fun FarmerCompanyRateTable(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = 6.dp)
     ) {
       Row(
           modifier = modifier
@@ -43,7 +43,7 @@ fun FarmerCompanyRateTable(
 
           Text(
               text = "Company Rates :",
-              fontSize = 20.sp,
+              fontSize = 18.sp,
               fontWeight = FontWeight.Black,
               color = Color.Black,
 
@@ -51,7 +51,7 @@ fun FarmerCompanyRateTable(
 
           Text(
               text = ": $cityName",
-              fontSize = 20.sp,
+              fontSize = 15.sp,
               fontWeight = FontWeight.Black,
               color = Color.Red,
               modifier = Modifier.padding(horizontal = 10.dp)

@@ -28,10 +28,6 @@ class HomeViewModel @Inject constructor(
         loadInitialData()
     }
 
-    /**
-     * Today's date in yyyy-MM-dd format — matches Firestore doc IDs.
-     * Company Rates always use this — NOT DateSelector date.
-     */
     private fun getTodayDateString(): String {
         val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
         return sdf.format(java.util.Date())
@@ -52,14 +48,14 @@ class HomeViewModel @Inject constructor(
                 val selected = selectedCategory.trim().lowercase()
 
                 variety == selected ||
-                category == selected ||
-                variety.contains(selected) ||
-                category.contains(selected) ||
-                rate.companyName.lowercase().contains(selected)
+                        category == selected ||
+                        variety.contains(selected) ||
+                        category.contains(selected) ||
+                        rate.companyName.lowercase().contains(selected)
             }
         }
 
-        Log.d("CategoryDebug", 
+        Log.d("CategoryDebug",
             "Total: ${rates.size} | After filter: ${filtered.size}"
         )
 
@@ -86,7 +82,7 @@ class HomeViewModel @Inject constructor(
             val dummyCategories = listOf(
                 CategoryDomain("broiler", "Broiler", R.drawable.chicken),
                 CategoryDomain("eggs", "Eggs", R.drawable.egg_tongue_face),
-                CategoryDomain("chickes", "chickes", R.drawable.boiled_chicken),
+                CategoryDomain("chickes", "Chicks", R.drawable.boiled_chicken),
             )
 
             _uiState.update {
@@ -98,7 +94,6 @@ class HomeViewModel @Inject constructor(
                 )
             }
 
-            // ← Sirf fetchRatesForDate — empty company call HATAYA
             today?.let {
                 fetchRatesForDate(it.isAvailable1)
             }
@@ -119,10 +114,10 @@ class HomeViewModel @Inject constructor(
 
                 val firstCity = newSelectedState?.cities?.firstOrNull()
 
-                // ← FIXED: Sirf tab fetch karo jab city actually change ho
                 if (firstCity?.city != currentState.selectedCityRate?.city) {
                     firstCity?.let {
-                        fetchCompanyUpdates(getTodayDateString(), it.city)
+                        // ✅ FIX 1: getTodayDateString() ki jagah dateString pass karo
+                        fetchCompanyUpdates(dateString, it.city)
                     }
                 }
 
@@ -180,9 +175,10 @@ class HomeViewModel @Inject constructor(
             )
         }
 
-        // ← Only fetch if city is valid
         if (firstCity != null) {
-            fetchCompanyUpdates(getTodayDateString(), firstCity.city)
+
+            val currentDate = _uiState.value.selectedDate?.isAvailable1 ?: getTodayDateString()
+            fetchCompanyUpdates(currentDate, firstCity.city)
         }
     }
 
@@ -190,14 +186,13 @@ class HomeViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 selectedCityRate = marketRate,
-
             )
         }
-        fetchCompanyUpdates(getTodayDateString(), marketRate.city)
+        val currentDate = _uiState.value.selectedDate?.isAvailable1 ?: getTodayDateString()
+        fetchCompanyUpdates(currentDate, marketRate.city)
     }
 
     private fun fetchCompanyUpdates(dateString: String, cityId: String) {
-        // ← Guard: blank city ya date ho toh bilkul call mat karo
         if (dateString.isBlank() || cityId.isBlank()) {
             Log.w("HomeViewModel", "Skipping company fetch — blank dateString or cityId")
             return
@@ -208,9 +203,8 @@ class HomeViewModel @Inject constructor(
         companyRatesJob?.cancel()
         companyRatesJob = repository.getCompanyRatesForCity(dateString, cityId)
             .onEach { updates ->
-                // DEBUG — see what variety field actually contains
-                updates.forEach { 
-                    Log.d("CategoryDebug", 
+                updates.forEach {
+                    Log.d("CategoryDebug",
                         "company=${it.companyName} | variety=${it.variety} | category=${it.category} | rate=${it.rate}"
                     )
                 }
