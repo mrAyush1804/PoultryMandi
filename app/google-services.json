@@ -7,12 +7,25 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1041518266095:android:af9449de7e0632405c7d1a",
+        "mobilesdk_app_id": "1:1041518266095:android:6a0031cb7dba47245c7d1a",
         "android_client_info": {
-          "package_name": "com.example.poultrymandi"
+          "package_name": "com.example.polutrymandiadmin"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1041518266095-80tca0rhead31fnj1jg829a902700oiu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.polutrymandiadmin",
+            "certificate_hash": "185a67b43f81a91a982eacde379dfdaaac29b671"
+          }
+        },
+        {
+          "client_id": "1041518266095-j52d0ldnvvholhq0tm5ce0fb5ds73l3u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA5A-uU1tLWgx2z2lkjg_tYXgLXR4vjlFg"
@@ -20,7 +33,78 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1041518266095-j52d0ldnvvholhq0tm5ce0fb5ds73l3u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1041518266095:android:af9449de7e0632405c7d1a",
+        "android_client_info": {
+          "package_name": "com.example.poultrymandi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1041518266095-crjehpa8m1vl2kbu6n8ghq7ibts3j6vk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.poultrymandi",
+            "certificate_hash": "185a67b43f81a91a982eacde379dfdaaac29b671"
+          }
+        },
+        {
+          "client_id": "1041518266095-j52d0ldnvvholhq0tm5ce0fb5ds73l3u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5A-uU1tLWgx2z2lkjg_tYXgLXR4vjlFg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1041518266095-j52d0ldnvvholhq0tm5ce0fb5ds73l3u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1041518266095:android:354c4fee05b8da685c7d1a",
+        "android_client_info": {
+          "package_name": "com.ninjafarm.poultrymandi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1041518266095-j52d0ldnvvholhq0tm5ce0fb5ds73l3u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5A-uU1tLWgx2z2lkjg_tYXgLXR4vjlFg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1041518266095-j52d0ldnvvholhq0tm5ce0fb5ds73l3u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
