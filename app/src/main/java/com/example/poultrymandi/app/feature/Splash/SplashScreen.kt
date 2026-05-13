@@ -16,12 +16,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.poultrymandi.R
 import com.example.poultrymandi.app.Core.ui.theme.Coustemyellow
 
-
+@Preview(showBackground = true)
 @Composable
 fun SplashScreen(
 
@@ -30,7 +31,7 @@ fun SplashScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = Coustemyellow )
+            .background(color = Color.White )
     ){
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -39,7 +40,7 @@ fun SplashScreen(
 
         ) {
             Image(
-                painter = painterResource(id = R.drawable.chicks),
+                painter = painterResource(id = R.drawable.poulyryawalamandi),
                 contentDescription = "logo",
                 modifier = Modifier.size(100.dp)
 
