@@ -37,28 +37,47 @@ class HomeViewModel @Inject constructor(
         rates: List<CompanyRateUpdate>,
         selectedCategory: String?
     ): Map<String, List<CompanyRateUpdate>> {
-        Log.d("CategoryDebug", "Filtering by category: $selectedCategory")
+        Log.d("CategoryDebug", "Filtering by category: $selectedCategory | rates size: ${rates.size}")
+
+        // ✅ Firestore se aa rahi exact values dekho
+        rates.forEach {
+            Log.d("ChicksDebug",
+                "company=${it.companyName} | variety='${it.variety}' | category='${it.category}'"
+            )
+        }
 
         val filtered = if (selectedCategory.isNullOrBlank()) {
             rates
         } else {
+            val selected = selectedCategory.trim().lowercase()
+
             rates.filter { rate ->
                 val variety = rate.variety.trim().lowercase()
                 val category = rate.category.trim().lowercase()
-                val selected = selectedCategory.trim().lowercase()
+                val company = rate.companyName.trim().lowercase()
 
-                variety == selected ||
-                        category == selected ||
-                        variety.contains(selected) ||
-                        category.contains(selected) ||
-                        rate.companyName.lowercase().contains(selected)
+                // ✅ Sirf aliases block — purana duplicate code HATAYA
+                val aliases = when (selected) {
+                    "chicks", "chickes", "chick" -> listOf(
+                        "chicks", "chickes", "chick",
+                        "day old", "doc", "dayold", "day-old"
+                    )
+                    "broiler" -> listOf("broiler")
+                    "eggs", "egg" -> listOf("eggs", "egg")
+                    else -> listOf(selected)
+                }
+
+                aliases.any { alias ->
+                    variety == alias ||
+                            category == alias ||
+                            variety.contains(alias) ||
+                            category.contains(alias) ||
+                            company.contains(alias)
+                }
             }
         }
 
-        Log.d("CategoryDebug",
-            "Total: ${rates.size} | After filter: ${filtered.size}"
-        )
-
+        Log.d("CategoryDebug", "Total: ${rates.size} | After filter: ${filtered.size}")
         return filtered.groupBy { it.companyName }
     }
 
@@ -82,7 +101,7 @@ class HomeViewModel @Inject constructor(
             val dummyCategories = listOf(
                 CategoryDomain("broiler", "Broiler", R.drawable.chicken),
                 CategoryDomain("eggs", "Eggs", R.drawable.egg_tongue_face),
-                CategoryDomain("chickes", "Chicks", R.drawable.boiled_chicken),
+                CategoryDomain("chicks", "Chicks", R.drawable.boiled_chicken), // ✅ typo fix
             )
 
             _uiState.update {
@@ -116,7 +135,6 @@ class HomeViewModel @Inject constructor(
 
                 if (firstCity?.city != currentState.selectedCityRate?.city) {
                     firstCity?.let {
-                        // ✅ FIX 1: getTodayDateString() ki jagah dateString pass karo
                         fetchCompanyUpdates(dateString, it.city)
                     }
                 }
@@ -176,7 +194,6 @@ class HomeViewModel @Inject constructor(
         }
 
         if (firstCity != null) {
-
             val currentDate = _uiState.value.selectedDate?.isAvailable1 ?: getTodayDateString()
             fetchCompanyUpdates(currentDate, firstCity.city)
         }
@@ -184,9 +201,7 @@ class HomeViewModel @Inject constructor(
 
     private fun onCityClick(marketRate: MarketRateDomain) {
         _uiState.update {
-            it.copy(
-                selectedCityRate = marketRate,
-            )
+            it.copy(selectedCityRate = marketRate)
         }
         val currentDate = _uiState.value.selectedDate?.isAvailable1 ?: getTodayDateString()
         fetchCompanyUpdates(currentDate, marketRate.city)
