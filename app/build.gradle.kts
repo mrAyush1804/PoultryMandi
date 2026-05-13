@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.poultrymandi"
+    namespace = "com.ninjafarm.poultrymandi"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.poultrymandi"
+        applicationId = "com.ninjafarm.poultrymandi"
         minSdk = 24
         targetSdk = 35
         versionCode = 1

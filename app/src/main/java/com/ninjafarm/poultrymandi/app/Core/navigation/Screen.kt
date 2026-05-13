@@ -1,0 +1,37 @@
+package com.ninjafarm.poultrymandi.app.Core.navigation
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+sealed class Screen {
+
+    @Serializable
+    object Splash : Screen()
+
+    @Serializable
+    object Home : Screen()
+
+    @Serializable
+    object Login : Screen()
+
+    @Serializable
+    object SignUp : Screen()
+
+    @Serializable
+    object CompleteProfile : Screen()
+
+    @Serializable
+    object Notifications : Screen()
+
+    @Serializable
+    object Profile : Screen()
+
+    @Serializable
+    object HomeBottomNavigationScreenHolder : Screen()
+
+    @Serializable
+    data class Dashboard(val userId: String = "") : Screen()
+
+    @Serializable
+    object PaperRate : Screen()
+}
