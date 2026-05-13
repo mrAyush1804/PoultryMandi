@@ -20,7 +20,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.poultrymandi.R
-import com.example.poultrymandi.app.Core.ui.theme.Coustemyellow
 
 @Preview(showBackground = true)
 @Composable
@@ -40,7 +39,7 @@ fun SplashScreen(
 
         ) {
             Image(
-                painter = painterResource(id = R.drawable.poulyryawalamandi),
+                painter = painterResource(id = R.drawable.`poulyryawalamandi.jpeg`),
                 contentDescription = "logo",
                 modifier = Modifier.size(100.dp)
 
