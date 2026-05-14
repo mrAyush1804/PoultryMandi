@@ -21,6 +21,7 @@ import com.ninjafarm.poultrymandi.app.Core.navigation.Screen
 import com.ninjafarm.poultrymandi.app.feature.animation.DynamicIsland
 import com.ninjafarm.poultrymandi.app.feature.home.presentation.Components.*
 import kotlin.math.abs
+import com.ninjafarm.poultrymandi.R
 
 /**
  * HomeScreen - Farmer Friendly Redesign.

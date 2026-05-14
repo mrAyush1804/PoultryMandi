@@ -22,7 +22,7 @@ import com.ninjafarm.poultrymandi.app.Core.ui.components.AppEditText
 import com.ninjafarm.poultrymandi.app.Core.ui.components.CustomInputType
 import com.ninjafarm.poultrymandi.app.Core.ui.components.CustomTextFieldState
 import com.ninjafarm.poultrymandi.app.Core.ui.theme.brown
-
+import com.ninjafarm.poultrymandi.R
 @Composable
 fun LoginScreen(
     uiState: LoginState,
