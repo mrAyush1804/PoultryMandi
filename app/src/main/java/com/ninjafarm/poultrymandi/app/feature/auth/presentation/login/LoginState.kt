@@ -10,7 +10,8 @@ data class LoginState(
     val generalError: String? = null,
     val loginSuccess: Boolean = false,
     val successMessage: String? = null,
-    val rememberMe: Boolean= false
+    val rememberMe: Boolean= false,
+    val userId: String = ""
 )
 
 sealed class LoginEvent {

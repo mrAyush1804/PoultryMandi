@@ -5,6 +5,8 @@ import android.util.Log
 import com.ninjafarm.poultrymandi.app.feature.auth.domain.repository.AuthRepository
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.actionCodeSettings
 import com.google.firebase.auth.auth
@@ -22,8 +24,22 @@ class AuthRepositoryImpl @Inject constructor(
     companion object {
         private const val TAG = "AuthRepositoryImpl"
         private const val USERS = "users"
-
     }
+
+    override suspend fun login(email: String, password: String): Result<String> {
+        return try {
+            val result = auth.signInWithEmailAndPassword(email, password).await()
+            val userId = result.user?.uid ?: throw Exception("User ID is null")
+            Result.success(userId)
+        } catch (e: FirebaseAuthInvalidUserException) {
+            Result.failure(Exception("No account found"))
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            Result.failure(Exception("Wrong password"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun sendEmailVerificationLink(email: String): Result<Unit> {
         return try {
             val actionCodeSettings = actionCodeSettings {
@@ -41,7 +57,7 @@ class AuthRepositoryImpl @Inject constructor(
         }catch (e: Exception){
             Result.failure(e)
 
-        } as Result<Unit>
+        }
     }
 
     override suspend fun signInWithEmailLink(

@@ -8,3 +8,5 @@ data class DataItem(
     val isAvailable1: String,
     val isAvailable: Boolean = true
 )
+
+{}

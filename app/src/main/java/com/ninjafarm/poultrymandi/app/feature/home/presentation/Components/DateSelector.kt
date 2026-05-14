@@ -26,9 +26,22 @@ fun DateSelector(
     selectedDate: DataItem?,
     onDateSelected: (DataItem) -> Unit,
     modifier: Modifier = Modifier,
-    monthYear: String = "September 2023"  // ← Dynamic baad me hoga
+    monthYear: Modifier = Modifier  // ← Dynamic baad me hoga
 ) {
     val listState = rememberLazyListState()
+
+
+
+
+    val dynamicMonthYear by remember(selectedDate) {
+        derivedStateOf {
+            if (selectedDate != null) {
+                "${selectedDate.month} ${selectedDate.year}"
+            } else {
+                "Select Date"
+            }
+        }
+    }
 
 
     LaunchedEffect(selectedDate) {

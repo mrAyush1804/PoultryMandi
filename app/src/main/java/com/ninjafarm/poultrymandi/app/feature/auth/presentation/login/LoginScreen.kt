@@ -1,6 +1,5 @@
 package com.ninjafarm.poultrymandi.app.feature.auth.presentation.login
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -51,11 +49,7 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Image(
-                painter = painterResource(R.drawable.chicks),
-                contentDescription = "App Logo",
-                modifier = Modifier.size(100.dp),
-            )
+            // No images as per instructions
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -165,14 +159,11 @@ fun LoginScreen(
                     )
                 },
                 trailingIcon = {
-                    val imageRes =
-                        if (isPasswordVisible) R.drawable.visibility else R.drawable.visibility_off
-
                     IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                         Icon(
-                            painter = painterResource(id = imageRes), // painterResource use karein
+                            imageVector = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                             contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
-                            tint = brown // Color yahan se control hoga
+                            tint = brown
                         )
                     }
                 },
@@ -236,12 +227,6 @@ fun LoginScreen(
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(start = 4.dp)
                     )
-                }
-            }
-
-            if (uiState.loginSuccess) {
-                LaunchedEffect(Unit) {
-                    onLoginSuccess()
                 }
             }
         }

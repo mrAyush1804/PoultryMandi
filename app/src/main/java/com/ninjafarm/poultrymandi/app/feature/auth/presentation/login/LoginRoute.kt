@@ -1,4 +1,5 @@
 package com.ninjafarm.poultrymandi.app.feature.auth.presentation.login
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -16,7 +17,7 @@ fun LoginRoute (
 
     LaunchedEffect(uiState.loginSuccess) {
         if (uiState.loginSuccess) {
-            onLoginSuccess("user123")
+            onLoginSuccess(uiState.userId)
         }
     }
 
@@ -24,9 +25,7 @@ fun LoginRoute (
         onEvent = { event ->
             viewModel.onEvent(event)
         },
-        onLoginSuccess = {
-            onLoginSuccess("user123")
-        },
+        onLoginSuccess = {},
         onSignupClick = onNavigateToSignUp,
         uiState = uiState
     )
