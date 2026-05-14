@@ -1,5 +1,6 @@
 package com.ninjafarm.poultrymandi.app.feature.CompleteProfile.presentation
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -18,12 +20,14 @@ import com.ninjafarm.poultrymandi.app.Core.ui.components.AppEditText
 import com.ninjafarm.poultrymandi.app.Core.ui.components.CustomInputType
 import com.ninjafarm.poultrymandi.app.Core.ui.components.CustomTextFieldState
 import com.ninjafarm.poultrymandi.app.Core.ui.theme.brown
-
+import com.ninjafarm.poultrymandi.R
 @Composable
 fun CompleteProfileScreen(
     uiState: CompleteProfileState,
     onEvent: (CompleteProfileEvent) -> Unit
 ) {
+
+
     val scrollState = rememberScrollState()
 
     Surface(
@@ -37,7 +41,15 @@ fun CompleteProfileScreen(
                 .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Image(
+                painter = painterResource(id = R.drawable.chicks),
+                contentDescription = "App Logo",
+                modifier = Modifier.size(80.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = "Complete Your Profile",
@@ -57,7 +69,7 @@ fun CompleteProfileScreen(
 
             AppEditText(
                 value = uiState.name,
-                onValueChange = { onEvent(CompleteProfileEvent.NameChanged(it)) },
+                onValueChange = { onEvent(CompleteProfileEvent.NameChanged(it)) }, // ✅ viewModel.onEvent → onEvent
                 label = "Full Name",
                 placeholder = "Enter your full name",
                 errorMessage = uiState.nameError,
@@ -71,7 +83,7 @@ fun CompleteProfileScreen(
 
             AppEditText(
                 value = uiState.phoneNumber,
-                onValueChange = { onEvent(CompleteProfileEvent.PhoneNumberChanged(it)) },
+                onValueChange = { onEvent(CompleteProfileEvent.PhoneNumberChanged(it)) }, // ✅
                 label = "Phone Number",
                 placeholder = "10 digit mobile number",
                 errorMessage = uiState.phoneNumberError,
@@ -85,7 +97,7 @@ fun CompleteProfileScreen(
 
             AppEditText(
                 value = uiState.occupation,
-                onValueChange = { onEvent(CompleteProfileEvent.OccupationChanged(it)) },
+                onValueChange = { onEvent(CompleteProfileEvent.OccupationChanged(it)) }, // ✅
                 label = "Occupation",
                 placeholder = "e.g. Farmer, Trader, Feed Supplier",
                 errorMessage = uiState.occupationError,
@@ -99,7 +111,7 @@ fun CompleteProfileScreen(
 
             AppEditText(
                 value = uiState.income,
-                onValueChange = { onEvent(CompleteProfileEvent.IncomeChanged(it)) },
+                onValueChange = { onEvent(CompleteProfileEvent.IncomeChanged(it)) }, // ✅
                 label = "Annual Income (₹)",
                 placeholder = "Approx annual income",
                 errorMessage = uiState.incomeError,
@@ -113,7 +125,7 @@ fun CompleteProfileScreen(
 
             AppEditText(
                 value = uiState.address,
-                onValueChange = { onEvent(CompleteProfileEvent.AddressChanged(it)) },
+                onValueChange = { onEvent(CompleteProfileEvent.AddressChanged(it)) }, // ✅
                 label = "Full Address (Optional)",
                 placeholder = "Village, Tehsil, District, State",
                 inputType = CustomInputType.Text,
@@ -125,7 +137,7 @@ fun CompleteProfileScreen(
 
             AppButton(
                 text = "Save and Continue",
-                onClick = { onEvent(CompleteProfileEvent.SubmitClicked) },
+                onClick = { onEvent(CompleteProfileEvent.SubmitClicked) }, // ✅
                 enabled = uiState.isFormValid && !uiState.isLoading,
                 isLoading = uiState.isLoading,
                 modifier = Modifier.fillMaxWidth()
