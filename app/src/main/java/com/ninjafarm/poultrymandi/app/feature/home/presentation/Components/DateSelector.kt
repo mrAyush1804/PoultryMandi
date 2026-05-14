@@ -1,6 +1,8 @@
 package com.ninjafarm.poultrymandi.app.feature.home.presentation.Components
 
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -19,29 +21,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ninjafarm.poultrymandi.app.Core.ui.theme.brown
 import com.ninjafarm.poultrymandi.app.feature.home.data.model.DataItem
+import java.time.LocalDate
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DateSelector(
     dates: List<DataItem>,
     selectedDate: DataItem?,
     onDateSelected: (DataItem) -> Unit,
     modifier: Modifier = Modifier,
-    monthYear: Modifier = Modifier  // ← Dynamic baad me hoga
+    monthYear: String = "September 2026"  // ← Dynamic baad me hoga
 ) {
     val listState = rememberLazyListState()
-
-
-
-
-    val dynamicMonthYear by remember(selectedDate) {
-        derivedStateOf {
-            if (selectedDate != null) {
-                "${selectedDate.month} ${selectedDate.year}"
-            } else {
-                "Select Date"
-            }
-        }
-    }
 
 
     LaunchedEffect(selectedDate) {
@@ -50,6 +41,15 @@ fun DateSelector(
             if (index >= 0) listState.animateScrollToItem(index)
         }
     }
+
+    val currentDate = LocalDate.now()
+
+    val currentMonth = currentDate.month.name.lowercase()
+        .replaceFirstChar { it.uppercase() }
+
+    val currentYear = currentDate.year
+
+    val currentMonthYear = "$currentMonth $currentYear"
 
     Column(modifier = modifier) {
 
@@ -62,7 +62,7 @@ fun DateSelector(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = monthYear,
+                text = currentMonthYear,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFF333333)
