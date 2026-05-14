@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ninjafarm.poultrymandi.app.Core.ui.theme.brown
 import com.ninjafarm.poultrymandi.app.feature.home.data.model.DataItem
+import java.time.LocalDate
 
 @Composable
 fun DateSelector(
@@ -26,7 +27,7 @@ fun DateSelector(
     selectedDate: DataItem?,
     onDateSelected: (DataItem) -> Unit,
     modifier: Modifier = Modifier,
-    monthYear: String = "September 2023"  // ← Dynamic baad me hoga
+    monthYear: String = "September 2026"  // ← Dynamic baad me hoga
 ) {
     val listState = rememberLazyListState()
 
@@ -37,6 +38,15 @@ fun DateSelector(
             if (index >= 0) listState.animateScrollToItem(index)
         }
     }
+
+    val currentDate = LocalDate.now()
+
+    val currentMonth = currentDate.month.name.lowercase()
+        .replaceFirstChar { it.uppercase() }
+
+    val currentYear = currentDate.year
+
+    val currentMonthYear = "$currentMonth $currentYear"
 
     Column(modifier = modifier) {
 
@@ -49,7 +59,7 @@ fun DateSelector(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = monthYear,
+                text = currentMonthYear,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFF333333)
