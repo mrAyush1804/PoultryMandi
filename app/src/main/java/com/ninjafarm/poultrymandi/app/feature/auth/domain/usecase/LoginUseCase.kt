@@ -10,32 +10,38 @@ class LoginUseCase @Inject constructor(
     suspend operator fun invoke(email: String, password: String): Result<String> {
         Log.d("LoginUseCase", "invoke() → email: $email")
 
-        // ✅ Step 1: Pehle login try karo
-        val loginResult = repository.login(email, password)
+        // Step 1: Pehle check karo email Firebase mein registered hai ya nahi
+        val emailExists = repository.checkEmailExists(email.trim())
+        Log.d("LoginUseCase", "emailExists: $emailExists")
 
-        // ✅ Step 2: Login success → return karo
-        if (loginResult.isSuccess) {
-            Log.d("LoginUseCase", "✅ Login success")
-            return loginResult
+        if (!emailExists) {
+            // Email registered nahi hai
+            Log.d("LoginUseCase", "Email not registered → reject karo")
+            return Result.failure(
+                Exception("NOT_REGISTERED")
+            )
         }
 
-        val errorMsg = loginResult.exceptionOrNull()?.message ?: ""
-        Log.d("LoginUseCase", "Login failed with: $errorMsg")
+        // Step 2: Email registered hai → login try karo
+        Log.d("LoginUseCase", "Email exists → login karo")
+        return repository.login(email.trim(), password.trim())
+    }
 
-        // ✅ Step 3: Sirf "account nahi mila" pe signup karo
-        // Wrong password pe signup mat karo
-        return if (
-            errorMsg.contains("Account nahi mila", ignoreCase = true) ||
-            errorMsg.contains("no account", ignoreCase = true) ||
-            errorMsg.contains("user not found", ignoreCase = true) ||
-            errorMsg.contains("no user", ignoreCase = true)
-        ) {
-            Log.d("LoginUseCase", "Account nahi hai → signUp() karo")
-            repository.signUp(email, password)
-        } else {
-            // ✅ Wrong password ya koi aur error → wahi return karo
-            Log.d("LoginUseCase", "Wrong password ya aur error → login error return")
-            loginResult
+    suspend fun sendPasswordReset(email: String): Result<Unit> {
+        return try {
+            // Pehle check karo email registered hai ya nahi
+            val exists = repository.checkEmailExists(email)
+
+            if (!exists) {
+                // Email Firebase mein nahi hai → unregistered
+                return Result.failure(Exception("NOT_REGISTERED"))
+            }
+
+            // Email registered hai → reset link bhejo
+            repository.sendPasswordResetLink(email)
+
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 }

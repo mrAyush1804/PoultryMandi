@@ -1,37 +1,37 @@
 package com.ninjafarm.poultrymandi.app.feature.auth.presentation.singup
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ninjafarm.poultrymandi.app.feature.auth.presentation.signup.SignupScreen
 
-
 @Composable
 fun SignUpRoute(
-    viewModel: SingupViewModel = hiltViewModel(),
-    onNavigateToLogin: () -> Unit,
-    onSignUpSuccess: (userId: String) -> Unit,
-    webClientId: String
-
+    viewModel            : SingupViewModel = hiltViewModel(),
+    onNavigateToLogin    : () -> Unit = {},
+    onGoogleSignUpSuccess: () -> Unit = {},  // ✅ Google → SetPassword
+    onManualSignUpSuccess: () -> Unit = {},  // ✅ Manual → CompleteProfile
+    webClientId          : String
 ) {
-
     val uiState by viewModel.uiState.collectAsState()
+
+    // ✅ Google Sign In success → SetPassword screen
+    LaunchedEffect(uiState.googleSignInSuccess) {
+        if (uiState.googleSignInSuccess) {
+            onGoogleSignUpSuccess()
+        }
+    }
+
+    // ✅ Manual signup success → CompleteProfile screen
     LaunchedEffect(uiState.singupSuccess) {
         if (uiState.singupSuccess) {
-            onSignUpSuccess("newUser123")
+            onManualSignUpSuccess()
         }
     }
 
     SignupScreen(
-        viewModel = viewModel,
-        onLoginClick =  onNavigateToLogin,
-        onSignupSuccess = { onSignUpSuccess("newUser123") },
-        webClientId = webClientId  // ✅ CHANGE 2 — pass karo
-
-
+        viewModel       = viewModel,
+        onLoginClick    = onNavigateToLogin,
+        onSignupSuccess = onGoogleSignUpSuccess,
+        webClientId     = webClientId
     )
-
-
 }

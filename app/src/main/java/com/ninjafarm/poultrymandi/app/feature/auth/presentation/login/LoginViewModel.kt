@@ -28,6 +28,7 @@ class LoginViewModel @Inject constructor(
             is LoginEvent.RememberMeChanged -> updateRememberMe(event.checked)
             LoginEvent.LoginClicked -> performLogin()
             LoginEvent.ClearError -> clearError()
+            is LoginEvent.ForgotPasswordClicked -> sendForgotPassword(event.email)
         }
     }
 
@@ -71,10 +72,46 @@ class LoginViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(generalError = null)
     }
 
+    private fun sendForgotPassword(email: String) {
+        if (email.isBlank()) {
+            _uiState.value = _uiState.value.copy(
+                forgotPasswordError = "Pehle email daalo, phir Forgot Password press karo"
+            )
+            return
+        }
+
+        _uiState.value = _uiState.value.copy(
+            isForgotLoading     = true,
+            forgotPasswordError = null,
+            forgotPasswordSent  = false
+        )
+
+        viewModelScope.launch {
+            val result = loginUseCase.sendPasswordReset(email.trim())
+            result.onSuccess {
+                _uiState.value = _uiState.value.copy(
+                    isForgotLoading    = false,
+                    forgotPasswordSent = true
+                )
+            }.onFailure { e ->
+                val errorMsg = when {
+                    e.message?.contains("NOT_REGISTERED", ignoreCase = true) == true ->
+                        "Yeh email registered nahi hai. Pehle signup karo."
+                    e.message?.contains("network", ignoreCase = true) == true ->
+                        "Internet connection check karo 📶"
+                    else -> e.message ?: "Reset link bhejne mein error aaya"
+                }
+                _uiState.value = _uiState.value.copy(
+                    isForgotLoading     = false,
+                    forgotPasswordError = errorMsg
+                )
+            }
+        }
+    }
+
     private fun performLogin() {
         val currentState = _uiState.value
 
-        // Step 1 — Form validate karo
         val formValidation = loginValidationUseCase.validateLoginForm(
             email = currentState.email,
             password = currentState.password
@@ -85,20 +122,17 @@ class LoginViewModel @Inject constructor(
                 emailError = when (formValidation.emailValidation) {
                     is ValidationResult.Error ->
                         (formValidation.emailValidation as ValidationResult.Error).message
-
                     ValidationResult.Success -> null
                 },
                 passwordError = when (formValidation.passwordValidation) {
                     is ValidationResult.Error ->
                         (formValidation.passwordValidation as ValidationResult.Error).message
-
                     ValidationResult.Success -> null
                 }
             )
             return
         }
 
-        // Step 2 — Loading start karo
         _uiState.value = currentState.copy(
             isLoading = true,
             generalError = null
@@ -120,25 +154,22 @@ class LoginViewModel @Inject constructor(
                 )
             }.onFailure { exception ->
                 val errorMsg = when {
-
+                    exception.message?.contains("NOT_REGISTERED", ignoreCase = true) == true ->
+                        "Yeh email registered nahi hai. Pehle signup karo. 👆"
 
                     exception.message?.contains("PASSWORD_RESET_SENT") == true ->
                         "Aapke email pe password set karne ka link bheja gaya hai ✅\n" +
                                 "Email check karo, naya password set karo, phir login karo."
 
-
                     exception.message?.contains("Wrong password", ignoreCase = true) == true ->
                         "Password galat hai, dobara try karo 🔐"
 
-
                     exception.message?.contains("Account nahi mila", ignoreCase = true) == true ->
-                        "Account nahi mila"
-
+                        "Yeh email registered nahi hai. Pehle signup karo. 👆"
 
                     exception.message?.contains("blocked", ignoreCase = true) == true ||
                             exception.message?.contains("too many", ignoreCase = true) == true ->
                         "Zyada attempts ho gaye, thodi der baad try karo "
-
 
                     exception.message?.contains("network", ignoreCase = true) == true ->
                         "Internet connection check karo "
@@ -155,4 +186,3 @@ class LoginViewModel @Inject constructor(
         }
     }
 }
-

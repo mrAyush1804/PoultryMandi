@@ -231,4 +231,16 @@ class AuthRepositoryImpl @Inject constructor(
             false
         }
     }
+
+    override suspend fun sendPasswordResetLink(email: String): Result<Unit> {
+        return try {
+            Log.d(TAG, "sendPasswordResetLink() → email: $email")
+            auth.sendPasswordResetEmail(email.trim()).await()
+            Log.d(TAG, "sendPasswordResetLink() ✅ sent")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "sendPasswordResetLink() ❌ ${e.message}")
+            Result.failure(e)
+        }
+    }
 }

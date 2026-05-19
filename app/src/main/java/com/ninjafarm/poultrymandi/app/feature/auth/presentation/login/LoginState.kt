@@ -11,7 +11,10 @@ data class LoginState(
     val loginSuccess: Boolean = false,
     val successMessage: String? = null,
     val rememberMe: Boolean= false,
-    val userId: String = ""
+    val userId: String = "",
+    val forgotPasswordSent  : Boolean = false,
+    val forgotPasswordError : String? = null,
+    val isForgotLoading     : Boolean = false
 )
 
 sealed class LoginEvent {
@@ -20,4 +23,5 @@ sealed class LoginEvent {
     data class RememberMeChanged(val checked: Boolean) : LoginEvent()
     object LoginClicked : LoginEvent()
     object ClearError : LoginEvent()
+    data class ForgotPasswordClicked(val email: String) : LoginEvent()
 }

@@ -71,9 +71,13 @@ fun AppNavigation(navController: NavHostController) {
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login)
                 },
-                onSignUpSuccess = {
-                    // Navigate to SetPassword after successful signup, removing signup from stack
+                onGoogleSignUpSuccess = {
                     navController.navigate(Screen.SetPassword) {
+                        popUpTo(Screen.SignUp) { inclusive = true }
+                    }
+                },
+                onManualSignUpSuccess = {
+                    navController.navigate(Screen.CompleteProfile) {
                         popUpTo(Screen.SignUp) { inclusive = true }
                     }
                 },
