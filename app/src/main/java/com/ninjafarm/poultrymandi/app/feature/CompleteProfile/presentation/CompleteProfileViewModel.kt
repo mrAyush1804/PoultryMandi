@@ -88,10 +88,10 @@ class CompleteProfileViewModel @Inject constructor(
                 income = state.income,
                 address = state.address
             ).onSuccess {
-                Log.d(TAG, "✅ Profile saved!")
+                Log.d(TAG, " Success: Profile saved!")
                 _uiState.update { it.copy(isLoading = false, submissionSuccess = true) }
             }.onFailure { error ->
-                Log.e(TAG, "❌ Failed: ${error.message}")
+                Log.e(TAG, " Failed: ${error.message}")
                 _uiState.update { it.copy(isLoading = false, generalError = error.message) }
             }
         }

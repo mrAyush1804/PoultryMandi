@@ -149,7 +149,7 @@ class LoginViewModel @Inject constructor(
                     isLoading = false,
                     loginSuccess = true,
                     userId = userId,
-                    successMessage = "Login successful! ✅",
+                    successMessage = "Login successful! ",
                     generalError = null
                 )
             }.onFailure { exception ->
@@ -162,7 +162,7 @@ class LoginViewModel @Inject constructor(
                                 "Email check karo, naya password set karo, phir login karo."
 
                     exception.message?.contains("Wrong password", ignoreCase = true) == true ->
-                        "Password galat hai, dobara try karo 🔐"
+                        "Password galat hai, dobara try karo "
 
                     exception.message?.contains("Account nahi mila", ignoreCase = true) == true ->
                         "Yeh email registered nahi hai. Pehle signup karo. 👆"
