@@ -28,7 +28,7 @@ class SingupViewModel @Inject constructor(
 
 
     companion object {
-        private const val TAG = "SingupViewModel"
+            private const val TAG = "SingupViewModel"
     }
 
 

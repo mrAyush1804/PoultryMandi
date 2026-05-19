@@ -2,7 +2,8 @@ package com.ninjafarm.poultrymandi.app.feature.auth.domain.repository
 
 interface AuthRepository {
     suspend fun login(email: String, password: String): Result<String>
-    
+    suspend fun signUp(email: String, password: String): Result<String>  // ✅ Naya
+    suspend fun checkEmailExists(email: String): Boolean                 // ✅ Naya
     suspend fun sendEmailVerificationLink(email: String): Result<Unit>
     suspend fun signInWithEmailLink(email: String, link: String): Result<Unit>
     fun isEmailSignInLink(link: String): Boolean
