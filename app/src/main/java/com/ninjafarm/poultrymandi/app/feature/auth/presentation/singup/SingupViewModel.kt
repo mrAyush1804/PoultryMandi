@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ninjafarm.poultrymandi.app.feature.auth.domain.usecase.Sinupusecase.GoogleSignInUseCase
 import com.ninjafarm.poultrymandi.app.feature.auth.domain.usecase.Sinupusecase.SendEmailLinkUseCase
+import com.ninjafarm.poultrymandi.app.feature.auth.domain.usecase.Sinupusecase.SignUpUseCase
 import com.ninjafarm.poultrymandi.app.feature.auth.domain.usecase.validation.SingupValidationUseCase
 import com.ninjafarm.poultrymandi.app.feature.auth.domain.usecase.validation.ValidationResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,6 +22,7 @@ class SingupViewModel @Inject constructor(
     private val singupValidationUseCase: SingupValidationUseCase,
     private val sendEmailLinkUseCase: SendEmailLinkUseCase,
     private val googleSignInUseCase: GoogleSignInUseCase,
+    private val signUpUseCase: SignUpUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SingupState())
@@ -28,7 +30,7 @@ class SingupViewModel @Inject constructor(
 
 
     companion object {
-        private const val TAG = "SingupViewModel"
+            private const val TAG = "SingupViewModel"
     }
 
 
@@ -44,8 +46,6 @@ class SingupViewModel @Inject constructor(
             SingupEvent.SignupClicked -> performSignup()
             SingupEvent.ClearError -> clearError()
             is SingupEvent.GoogleSignInClicked -> performGoogleSignIn(event.idToken)
-                // Handle Google Sign-In click
-
         }
     }
 
@@ -142,8 +142,6 @@ class SingupViewModel @Inject constructor(
 
     private fun updateContact(contact: String) {
         _uiState.update { currentState ->
-            // Contact is checked separately but contributes to basic validity if needed
-            // For now, keeping name/email/occ/pass as main drivers
             Log.d(TAG, "updateContact → contact: $contact")
             currentState.copy(
                 contact = contact,
@@ -196,11 +194,6 @@ class SingupViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Simply checks if all required fields have text.
-     * This allows the button to enable as soon as the user has filled the form.
-     * Strict validation (regex, etc.) is handled via error messages and on final click.
-     */
     private fun checkBasicFormValidity(
         name: String,
         email: String,
@@ -209,12 +202,10 @@ class SingupViewModel @Inject constructor(
         confirmPassword: String
     ): Boolean {
         val contact = _uiState.value.contact
-
-        // ✅ Email YA Phone — ek hona chahiye (dono nahi)
         val hasEmailOrPhone = email.isNotBlank() || contact.isNotBlank()
 
         val isValid = name.isNotBlank() &&
-                hasEmailOrPhone &&               // ← OR logic
+                hasEmailOrPhone &&
                 occupation.isNotBlank() &&
                 password.isNotBlank() &&
                 confirmPassword.isNotBlank() &&
@@ -231,31 +222,17 @@ class SingupViewModel @Inject constructor(
     private fun performSignup() {
         Log.d(TAG, "performSignup → START")
         val currentState = _uiState.value
-        Log.d(
-            TAG,
-            "performSignup → currentState: name=${currentState.name} email=${currentState.email} contact=${currentState.contact} occupation=${currentState.occupation}"
-        )
-        Log.d(TAG, "performSignup → formValidation.isFormValid:")
 
-
-        // Full validation check before proceeding
         val formValidation = singupValidationUseCase.validateSignupForm(
-            name = currentState.name,
-            email = currentState.email,
-            phone = currentState.contact,
-            password = currentState.password,
-            occupation = currentState.occupation,
+            name            = currentState.name,
+            email           = currentState.email,
+            phone           = currentState.contact,
+            password        = currentState.password,
+            occupation      = currentState.occupation,
             confirmPassword = currentState.confirmPassword
         )
 
         if (!formValidation.isFormValid) {
-            Log.e(TAG, "performSignup → FORM INVALID, errors:")
-            Log.e(TAG, "  emailError: ${formValidation.emailValidation}")
-            Log.e(TAG, "  nameError: ${formValidation.nameValidation}")
-            Log.e(TAG, "  phoneError: ${formValidation.phoneValidation}")
-            Log.e(TAG, "  occupationError: ${formValidation.occupationValidation}")
-            Log.e(TAG, "  passwordError: ${formValidation.passwordValidation}")
-            Log.e(TAG, "  confirmPasswordError: ${formValidation.confirmPasswordValidation}")
             _uiState.update { state ->
                 state.copy(
                     emailError = if (formValidation.emailValidation is ValidationResult.Error) formValidation.emailValidation.message else null,
@@ -266,43 +243,37 @@ class SingupViewModel @Inject constructor(
                     confirmPasswordError = if (formValidation.confirmPasswordValidation is ValidationResult.Error) formValidation.confirmPasswordValidation.message else null
                 )
             }
-
             return
         }
-        Log.d(
-            TAG,
-            "performSignup → Form valid, calling sendEmailLinkUseCase with email: ${currentState.email}"
-        )
 
         _uiState.update { it.copy(isLoading = true, generalError = null) }
 
         viewModelScope.launch {
-            Log.d(TAG, "performSignup → Coroutine started, sending email...")
-
-            sendEmailLinkUseCase(currentState.email)
-                .onSuccess {
-                    Log.d(TAG, "performSignup → ✅ SUCCESS — Email link sent!")
-
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            singupSuccess = true,
-                            successMessage = "Verification link bhej diya! Email check karo ✅"
-                        )
-                    }
+            signUpUseCase(
+                email    = currentState.email,
+                password = currentState.password
+            ).onSuccess { userId ->
+                Log.d(TAG, "performSignup → ✅ SUCCESS userId: $userId")
+                _uiState.update {
+                    it.copy(
+                        isLoading      = false,
+                        singupSuccess  = true,
+                        successMessage = "Account ban gaya! ✅"
+                    )
                 }
-                .onFailure { error ->
-                    Log.e(TAG, "performSignup → ❌ FAILED — ${error.message}", error)
-
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            singupSuccess = false,
-                            generalError = error.message
-                                ?: "Link bhejne mein error aaya, dobara try karo"
-                        )
-                    }
+            }.onFailure { error ->
+                Log.e(TAG, "performSignup → ❌ ${error.message}")
+                val errorMsg = when {
+                    error.message?.contains("already in use", ignoreCase = true) == true ->
+                        "Yeh email pehle se registered hai. Login karo."
+                    error.message?.contains("network", ignoreCase = true) == true ->
+                        "Internet connection check karo 📶"
+                    else -> error.message ?: "Signup failed, dobara try karo"
                 }
+                _uiState.update {
+                    it.copy(isLoading = false, generalError = errorMsg)
+                }
+            }
         }
     }
 }

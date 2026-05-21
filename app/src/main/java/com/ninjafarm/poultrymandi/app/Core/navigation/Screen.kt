@@ -18,6 +18,9 @@ sealed class Screen {
     object SignUp : Screen()
 
     @Serializable
+    object SetPassword : Screen()
+
+    @Serializable
     object CompleteProfile : Screen()
 
     @Serializable

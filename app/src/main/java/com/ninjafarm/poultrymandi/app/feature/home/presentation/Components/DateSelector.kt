@@ -1,6 +1,8 @@
 package com.ninjafarm.poultrymandi.app.feature.home.presentation.Components
 
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -21,6 +23,7 @@ import com.ninjafarm.poultrymandi.app.Core.ui.theme.brown
 import com.ninjafarm.poultrymandi.app.feature.home.data.model.DataItem
 import java.time.LocalDate
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DateSelector(
     dates: List<DataItem>,

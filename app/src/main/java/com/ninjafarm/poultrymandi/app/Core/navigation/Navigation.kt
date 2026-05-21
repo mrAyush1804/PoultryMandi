@@ -12,6 +12,7 @@ import com.ninjafarm.poultrymandi.app.feature.CompleteProfile.presentation.Compl
 import com.ninjafarm.poultrymandi.app.feature.Splash.SplashDestination
 import com.ninjafarm.poultrymandi.app.feature.Splash.SplashScreen
 import com.ninjafarm.poultrymandi.app.feature.Splash.SplashViewModel
+import com.ninjafarm.poultrymandi.app.feature.auth.presentation.PasswordsetScreenafetreontaoposinup.SetPasswordRoute
 import com.ninjafarm.poultrymandi.app.feature.auth.presentation.login.LoginRoute
 import com.ninjafarm.poultrymandi.app.feature.auth.presentation.singup.SignUpRoute
 import com.ninjafarm.poultrymandi.app.feature.home.presentation.Navigation.HomeBottomNavigationScreenHolder
@@ -70,13 +71,32 @@ fun AppNavigation(navController: NavHostController) {
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login)
                 },
-                onSignUpSuccess = { userId ->
-                    // Navigate to Complete Profile after successful signup, removing signup from stack
+                onGoogleSignUpSuccess = {
+                    navController.navigate(Screen.SetPassword) {
+                        popUpTo(Screen.SignUp) { inclusive = true }
+                    }
+                },
+                onManualSignUpSuccess = {
                     navController.navigate(Screen.CompleteProfile) {
                         popUpTo(Screen.SignUp) { inclusive = true }
                     }
                 },
                 webClientId = "1041518266095-j52d0ldnvvholhq0tm5ce0fb5ds73l3u.apps.googleusercontent.com"
+            )
+        }
+
+        composable<Screen.SetPassword> {
+            SetPasswordRoute(
+                onSuccess = {
+                    navController.navigate(Screen.HomeBottomNavigationScreenHolder) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onSkip = {
+                    navController.navigate(Screen.HomeBottomNavigationScreenHolder) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
 
